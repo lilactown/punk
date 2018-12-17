@@ -31,9 +31,6 @@
   cljs.core/List
   (with-index [s] (map-indexed vector s))
 
-  ;; cljs.core/Range
-  ;; (with-index [s] (map-indexed vector s))
-
   cljs.core/LazySeq
   (with-index [s] (map-indexed vector s))
 
