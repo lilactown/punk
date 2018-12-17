@@ -1,12 +1,15 @@
 (ns punk.core
   (:require [hx.react :as hx :refer [defnc]]
+            [hx.utils]
             [hx.react.hooks :refer [<-state <-effect]]
+            ["react-is" :as react-is]
             ["react-dom" :as react-dom]
+            [goog.object :as gobj]
             [clojure.string :as s]
             [clojure.datafy :as d]
             [clojure.core.protocols :as p]))
 
-(def dbg> (partial js/console.log "punk>"))
+(def dbg> tap> #_(partial js/console.log "punk>"))
 
 ;;
 ;; Implement general protocols
@@ -16,6 +19,40 @@
   js/Symbol
   (-pr-writer [sym writer _]
     (-write writer (str "\"" (.toString sym) "\""))))
+
+(defn -datafy-react-el [el]
+  (let [el-type (gobj/get el "type")
+        props (hx.utils/shallow-js->clj (gobj/get el "props") :keywordize-keys true)]
+    (if (array? (:children props))
+      (into [(if (string? el-type) (keyword el-type) el-type)
+             (dissoc props :children)]
+            (map d/datafy (:children props)))
+      [(if (string? el-type) (keyword el-type) el-type)
+       (dissoc props :children)
+       (d/datafy (:children props))])))
+
+#_(dbg> (hx/f [:div "foo"]))
+
+(defn dataficate [x]
+  (cond
+    (react-is/isElement x)
+    ;; we have to clone x since React elements are frozen
+    (let [x' (gobj/clone x)]
+      (specify! x'
+        p/Datafiable
+        (datafy [el] (-datafy-react-el el)))
+      x')
+
+    (object? x)
+    (do (specify! x
+          p/Datafiable
+          (datafy [o] (dissoc (js->clj o)
+                              ;; lol gross
+                              "clojure$core$protocols$Datafiable$"
+                              "clojure$core$protocols$Datafiable$datafy$arity$1")))
+        x)
+
+    :else x))
 
 ;;
 ;; Data structures
@@ -80,14 +117,7 @@
                                :k nil
                                :v nil}})
         tap-fn (fn [x]
-                 (when (object? x)
-                   (specify! x
-                     p/Datafiable
-                     (datafy [o] (dissoc (js->clj o)
-                                         ;; lol gross
-                                         "clojure$core$protocols$Datafiable$"
-                                         "clojure$core$protocols$Datafiable$datafy$arity$1"))))
-                 (swap! state update :log conj x))]
+                 (swap! state update :log conj (dataficate x)))]
     ;; add tap listener
     (<-effect (fn []
                 #_(dbg> "Adding tap")
