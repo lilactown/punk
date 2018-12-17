@@ -1,0 +1,11 @@
+{:deps true
+ :builds
+ {:workshop {:target :browser
+             :output-dir "public/workshop/js"
+             :asset-path "/js"
+             :modules {:main {:entries [punk.workshop]}}
+             :compiler-options {:devcards true}
+             :devtools {:http-root    "public/workshop"
+                        :http-port    8700
+                        :preloads     [devtools.preload]}}}
+ }
