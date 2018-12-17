@@ -1,7 +1,8 @@
 (ns punk.core
   (:require [hx.react :as hx :refer [defnc]]
-            [hx.react.hooks :refer [<-state]]
+            [hx.react.hooks :refer [<-state <-effect]]
             ["react-dom" :as react-dom]
+            [clojure.string :as s]
             [clojure.datafy :as d]))
 
 (def dbg> (partial js/console.log "punk>"))
@@ -19,9 +20,13 @@
 (defprotocol WithIndex
   (with-index [this]))
 
+
 (extend-protocol WithIndex
   cljs.core/PersistentVector
   (with-index [v] (map-indexed vector v))
+
+  cljs.core/PersistentHashSet
+  (with-index [s] (map-indexed vector s))
 
   default
   (with-index [x] x))
@@ -30,8 +35,8 @@
 ;; App panes
 ;;
 
-(defnc View [{:keys [data on-next]}]
-  [:div
+(defnc View [{:keys [data on-next] :as props}]
+  [:div props
    (if (coll? data)
      [:<>
       [:div {:style {:display "flex"
@@ -43,6 +48,7 @@
       (for [[key v] (with-index data)]
         [:div {:style {:display "flex"}
                :key key
+               :class "item"
                :on-click #(on-next data key v)}
          [:div {:style {:flex 1}}
           (prn-str key)]
@@ -52,6 +58,9 @@
        [:div {:on-click #(on-next data nil nil)}
         (prn-str data)]))])
 
+(defnc Style [{:keys [children]}]
+  [:style {:dangerouslySetInnerHTML #js {:__html (s/join "\n" children)}}])
+
 (defnc App [_]
   (let [state (<-state {:log [{:foo ["bar" "baz"]
                                :bar {:baz 42}}]
@@ -60,22 +69,37 @@
                                   :bar {:baz 42}}
                         :next {:coll nil
                                :k nil
-                               :v nil}})]
-    (dbg> @state)
+                               :v nil}})
+        tap-fn (fn [x]
+                 (dbg> @state)
+                 (swap! state assoc :log (conj (:log @state) x)))]
+    (<-effect (fn []
+                (dbg> "Adding watch")
+                (add-tap tap-fn)
+                (fn []
+                  (dbg> "removing watch")
+                  (remove-tap tap-fn)))
+              [state])
+    #_(dbg> @state)
     [:div {:style {:display "flex"
                    :height "100%"
                    :flex-direction "column"}}
+     ;; css
+     [Style
+      "#current .item { cursor: pointer; padding: 3px; margin 3px; }"
+      "#current .item:hover { background-color: #eee; }"
+      "#next { cursor: pointer; padding: 3px; margin 3px; }"
+      "#next:hover { background-color: #eee; }"
+      "#log .item { cursor: pointer; padding: 3px 0; margin: 3px 0; }"
+      "#log .item:hover { background-color: #eee; }"]
+     ;; Next
      [:div {:style {:flex 1}}
-      [View {:data (d/datafy (:current @state))
-             :on-next #(swap! state assoc
-                              :next
-                              {:coll %1
-                               :k %2
-                               :v %3})}]]
-     [:div {:style {:flex 1}}
-      [View {:data (d/nav (-> @state :next :coll)
-                          (-> @state :next :k)
-                          (-> @state :next :v))
+      [:h3 "Next"]
+      [View {:data (d/datafy
+                    (d/nav (-> @state :next :coll)
+                           (-> @state :next :k)
+                           (-> @state :next :v)))
+             :id "next"
              :on-next #(swap! state
                               assoc
                               :history (conj (:history @state)
@@ -84,12 +108,32 @@
                               :next {:coll nil
                                      :k nil
                                      :v nil})}]]
+     ;; Current
+     [:div {:style {:flex 1}}
+      [:h3 "Current"]
+      [View {:data (d/datafy (:current @state))
+             :id "current"
+             :on-next #(swap! state assoc
+                              :next
+                              {:coll %1
+                               :k %2
+                               :v %3})}]]
      [:div [:button {:type "button"
                      :disabled (empty? (:history @state))
                      :on-click #(swap! state assoc
                                        :current (peek (:history @state))
                                        :history (pop (:history @state))
-                                       :next {:coll nil :k nil :v nil})}"<"]]]))
+                                       :next {:coll nil :k nil :v nil})}"<"]]
+     ;; Log
+     [:div {:style {:flex 1}
+            :id "log"}
+      [:h3 "Log"]
+      (for [datum (:log @state)]
+        [:div {:on-click #(swap! state assoc
+                                 :current datum
+                                 :history [])
+               :class "item"}
+         (prn-str datum)])]]))
 
 
 (defn start! []
