@@ -3,15 +3,19 @@
             [hx.react.hooks :refer [<-state <-effect]]
             ["react-dom" :as react-dom]
             [clojure.string :as s]
-            [clojure.datafy :as d]))
+            [clojure.datafy :as d]
+            [clojure.core.protocols :as p]))
 
 (def dbg> (partial js/console.log "punk>"))
+
+;;
+;; Implement general protocols
+;;
 
 (extend-protocol IPrintWithWriter
   js/Symbol
   (-pr-writer [sym writer _]
     (-write writer (str "\"" (.toString sym) "\""))))
-
 
 ;;
 ;; Data structures
@@ -19,7 +23,6 @@
 
 (defprotocol WithIndex
   (with-index [this]))
-
 
 (extend-protocol WithIndex
   cljs.core/PersistentVector
@@ -43,7 +46,7 @@
 
 (defnc View [{:keys [data on-next] :as props}]
   (when (not (nil? data))
-    [:div props
+    [:div (dissoc props :on-next :data)
      (if (coll? data)
        [:<>
         [:div {:style {:display "flex"
@@ -77,16 +80,23 @@
                                :k nil
                                :v nil}})
         tap-fn (fn [x]
-                 (dbg> @state)
-                 (swap! state assoc :log (conj (:log @state) x)))]
+                 (when (object? x)
+                   (specify! x
+                     p/Datafiable
+                     (datafy [o] (dissoc (js->clj o)
+                                         ;; lol gross
+                                         "clojure$core$protocols$Datafiable$"
+                                         "clojure$core$protocols$Datafiable$datafy$arity$1"))))
+                 (swap! state update :log conj x))]
+    ;; add tap listener
     (<-effect (fn []
-                (dbg> "Adding tap")
+                #_(dbg> "Adding tap")
                 (add-tap tap-fn)
                 (fn []
-                  (dbg> "removing tap")
+                  #_(dbg> "removing tap")
                   (remove-tap tap-fn)))
               #_[state])
-    #_(dbg> @state)
+
     [:div {:style {:display "flex"
                    :height "100%"
                    :flex-direction "column"}}
@@ -157,9 +167,11 @@
                                  :current datum
                                  :history [])
                :class "item"}
-         (prn-str datum)])]]))
+         (prn-str (d/datafy datum))])]]))
 
-#_(tap> (js/Error. "foo"))
+#_(tap> #js {:asdf "jkl"})
+#_(tap> (js/Date.))
+#_(tap> (js/RegExp.))
 
 (defn start! []
   (let [container (or (. js/document getElementById "punk")
