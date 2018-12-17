@@ -28,6 +28,12 @@
   cljs.core/PersistentHashSet
   (with-index [s] (map-indexed vector s))
 
+  cljs.core/List
+  (with-index [s] (map-indexed vector s))
+
+  cljs.core/Range
+  (with-index [s] (map-indexed vector s))
+
   default
   (with-index [x] x))
 
@@ -36,27 +42,27 @@
 ;;
 
 (defnc View [{:keys [data on-next] :as props}]
-  [:div props
-   (if (coll? data)
-     [:<>
-      [:div {:style {:display "flex"
-                     :border-bottom "1px solid #999"
-                     :padding-bottom "3px"
-                     :margin-bottom "3px"}}
-       [:div {:style {:flex 1}} "key"]
-       [:div {:style {:flex 2}} "value"]]
-      (for [[key v] (with-index data)]
-        [:div {:style {:display "flex"}
-               :key key
-               :class "item"
-               :on-click #(on-next data key v)}
-         [:div {:style {:flex 1}}
-          (prn-str key)]
-         [:div {:style {:flex 2}}
-          (prn-str v)]])]
-     (when (not (nil? data))
+  (when (not (nil? data))
+    [:div props
+     (if (coll? data)
+       [:<>
+        [:div {:style {:display "flex"
+                       :border-bottom "1px solid #999"
+                       :padding-bottom "3px"
+                       :margin-bottom "3px"}}
+         [:div {:style {:flex 1}} "key"]
+         [:div {:style {:flex 2}} "value"]]
+        (for [[key v] (with-index data)]
+          [:div {:style {:display "flex"}
+                 :key key
+                 :class "item"
+                 :on-click #(on-next data key v)}
+           [:div {:style {:flex 1}}
+            (prn-str key)]
+           [:div {:style {:flex 2}}
+            (prn-str v)]])]
        [:div {:on-click #(on-next data nil nil)}
-        (prn-str data)]))])
+        (prn-str data)])]))
 
 (defnc Style [{:keys [children]}]
   [:style {:dangerouslySetInnerHTML #js {:__html (s/join "\n" children)}}])
@@ -74,12 +80,12 @@
                  (dbg> @state)
                  (swap! state assoc :log (conj (:log @state) x)))]
     (<-effect (fn []
-                (dbg> "Adding watch")
+                (dbg> "Adding tap")
                 (add-tap tap-fn)
                 (fn []
-                  (dbg> "removing watch")
+                  (dbg> "removing tap")
                   (remove-tap tap-fn)))
-              [state])
+              #_[state])
     #_(dbg> @state)
     [:div {:style {:display "flex"
                    :height "100%"
@@ -87,13 +93,17 @@
      ;; css
      [Style
       "#current .item { cursor: pointer; padding: 3px; margin 3px; }"
+      "#current { overflow: scroll }"
       "#current .item:hover { background-color: #eee; }"
       "#next { cursor: pointer; padding: 3px; margin 3px; }"
       "#next:hover { background-color: #eee; }"
       "#log .item { cursor: pointer; padding: 3px 0; margin: 3px 0; }"
       "#log .item:hover { background-color: #eee; }"]
      ;; Next
-     [:div {:style {:flex 1}}
+     [:div {:style {:flex 1
+                    :position "relative"
+                    :display "flex"
+                    :flex-direction "column"}}
       [:h3 "Next"]
       [View {:data (d/datafy
                     (d/nav (-> @state :next :coll)
@@ -109,7 +119,10 @@
                                      :k nil
                                      :v nil})}]]
      ;; Current
-     [:div {:style {:flex 1}}
+     [:div {:style {:flex 1
+                    :position "relative"
+                    :display "flex"
+                    :flex-direction "column"}}
       [:h3 "Current"]
       [View {:data (d/datafy (:current @state))
              :id "current"
@@ -118,14 +131,21 @@
                               {:coll %1
                                :k %2
                                :v %3})}]]
-     [:div [:button {:type "button"
-                     :disabled (empty? (:history @state))
-                     :on-click #(swap! state assoc
-                                       :current (peek (:history @state))
-                                       :history (pop (:history @state))
-                                       :next {:coll nil :k nil :v nil})}"<"]]
+     ;; Controls
+     [:div
+      [:button {:type "button"
+                :style {:width "60px"}
+                :disabled (empty? (:history @state))
+                :on-click #(swap! state assoc
+                                  :current (peek (:history @state))
+                                  :history (pop (:history @state))
+                                  :next {:coll nil :k nil :v nil})}"<"]]
+
      ;; Log
-     [:div {:style {:flex 1}
+     [:div {:style {:flex 1
+                    :position "relative"
+                    :display "flex"
+                    :flex-direction "column"}
             :id "log"}
       [:h3 "Log"]
       (for [datum (:log @state)]
@@ -135,6 +155,7 @@
                :class "item"}
          (prn-str datum)])]]))
 
+#_(tap> (partition 2(range 20)))
 
 (defn start! []
   (let [container (or (. js/document getElementById "punk")
