@@ -32,29 +32,31 @@
 
 (defnc View [{:keys [data on-next]}]
   [:div
-   [:div {:style {:display "flex"
-                  :border-bottom "1px solid #999"
-                  :padding-bottom "3px"
-                  :margin-bottom "3px"}}
-    [:div {:style {:flex 1}} "key"]
-    [:div {:style {:flex 2}} "value"]]
-   (if (seqable? data)
-     (for [[key v] (with-index data)]
-       [:div {:style {:display "flex"}
-              :on-click #(on-next data key v)}
-        [:div {:style {:flex 1}}
-         (prn-str key)]
-        [:div {:style {:flex 2}}
-         (prn-str v)]])
-     (prn-str data))])
-
-(defnc Next [{:keys [coll nav-key nav-val] :as props}]
-  (prn-str (d/nav coll nav-key nav-val)))
+   (if (coll? data)
+     [:<>
+      [:div {:style {:display "flex"
+                     :border-bottom "1px solid #999"
+                     :padding-bottom "3px"
+                     :margin-bottom "3px"}}
+       [:div {:style {:flex 1}} "key"]
+       [:div {:style {:flex 2}} "value"]]
+      (for [[key v] (with-index data)]
+        [:div {:style {:display "flex"}
+               :key key
+               :on-click #(on-next data key v)}
+         [:div {:style {:flex 1}}
+          (prn-str key)]
+         [:div {:style {:flex 2}}
+          (prn-str v)]])]
+     (when (not (nil? data))
+       [:div {:on-click #(on-next data nil nil)}
+        (prn-str data)]))])
 
 (defnc App [_]
-  (let [state (<-state {:log [{:foo ["bar"]
+  (let [state (<-state {:log [{:foo ["bar" "baz"]
                                :bar {:baz 42}}]
-                        :current {:foo ["bar"]
+                        :history []
+                        :current {:foo ["bar" "baz"]
                                   :bar {:baz 42}}
                         :next {:coll nil
                                :k nil
@@ -74,8 +76,20 @@
       [View {:data (d/nav (-> @state :next :coll)
                           (-> @state :next :k)
                           (-> @state :next :v))
-             :on-next #(swap! state assoc
-                              :current %3)}]]]))
+             :on-next #(swap! state
+                              assoc
+                              :history (conj (:history @state)
+                                             (:current @state))
+                              :current %1
+                              :next {:coll nil
+                                     :k nil
+                                     :v nil})}]]
+     [:div [:button {:type "button"
+                     :disabled (empty? (:history @state))
+                     :on-click #(swap! state assoc
+                                       :current (peek (:history @state))
+                                       :history (pop (:history @state))
+                                       :next {:coll nil :k nil :v nil})}"<"]]]))
 
 
 (defn start! []
