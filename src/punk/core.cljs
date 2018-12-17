@@ -31,7 +31,10 @@
   cljs.core/List
   (with-index [s] (map-indexed vector s))
 
-  cljs.core/Range
+  ;; cljs.core/Range
+  ;; (with-index [s] (map-indexed vector s))
+
+  cljs.core/LazySeq
   (with-index [s] (map-indexed vector s))
 
   default
@@ -92,19 +95,23 @@
                    :flex-direction "column"}}
      ;; css
      [Style
-      "#current .item { cursor: pointer; padding: 3px; margin 3px; }"
       "#current { overflow: scroll }"
+      "#current .item { cursor: pointer; padding: 3px; margin: 3px; }"
       "#current .item:hover { background-color: #eee; }"
-      "#next { cursor: pointer; padding: 3px; margin 3px; }"
+
+      "#next { overflow: scroll }"
+      "#next { cursor: pointer; padding: 3px; margin: 3px; }"
       "#next:hover { background-color: #eee; }"
+
+      "#log { overflow: scroll }"
       "#log .item { cursor: pointer; padding: 3px 0; margin: 3px 0; }"
       "#log .item:hover { background-color: #eee; }"]
      ;; Next
+     [:h3 "Next"]
      [:div {:style {:flex 1
                     :position "relative"
                     :display "flex"
                     :flex-direction "column"}}
-      [:h3 "Next"]
       [View {:data (d/datafy
                     (d/nav (-> @state :next :coll)
                            (-> @state :next :k)
@@ -119,11 +126,11 @@
                                      :k nil
                                      :v nil})}]]
      ;; Current
+     [:h3 "Current"]
      [:div {:style {:flex 1
                     :position "relative"
                     :display "flex"
                     :flex-direction "column"}}
-      [:h3 "Current"]
       [View {:data (d/datafy (:current @state))
              :id "current"
              :on-next #(swap! state assoc
@@ -142,12 +149,12 @@
                                   :next {:coll nil :k nil :v nil})}"<"]]
 
      ;; Log
+     [:h3 "Log"]
      [:div {:style {:flex 1
                     :position "relative"
                     :display "flex"
                     :flex-direction "column"}
             :id "log"}
-      [:h3 "Log"]
       (for [datum (:log @state)]
         [:div {:on-click #(swap! state assoc
                                  :current datum
@@ -155,7 +162,7 @@
                :class "item"}
          (prn-str datum)])]]))
 
-#_(tap> (partition 2(range 20)))
+#_(tap> (js/Error. "foo"))
 
 (defn start! []
   (let [container (or (. js/document getElementById "punk")
