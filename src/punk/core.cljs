@@ -20,29 +20,8 @@
   (-pr-writer [sym writer _]
     (-write writer (str "\"" (.toString sym) "\""))))
 
-(defn -datafy-react-el [el]
-  (let [el-type (gobj/get el "type")
-        props (hx.utils/shallow-js->clj (gobj/get el "props") :keywordize-keys true)]
-    (if (array? (:children props))
-      (into [(if (string? el-type) (keyword el-type) el-type)
-             (dissoc props :children)]
-            (map d/datafy (:children props)))
-      [(if (string? el-type) (keyword el-type) el-type)
-       (dissoc props :children)
-       (d/datafy (:children props))])))
-
-#_(dbg> (hx/f [:div "foo"]))
-
 (defn dataficate [x]
   (cond
-    (react-is/isElement x)
-    ;; we have to clone x since React elements are frozen
-    (let [x' (gobj/clone x)]
-      (specify! x'
-        p/Datafiable
-        (datafy [el] (-datafy-react-el el)))
-      x')
-
     (object? x)
     (do (specify! x
           p/Datafiable
