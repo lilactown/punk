@@ -3,7 +3,7 @@
             [clojure.string :as s]
             [clojure.datafy :as d]
             [clojure.core.protocols :as p]
-            [hanger.core]))
+            [frame.core]))
 
 (def dbg> (partial js/console.log "punk>"))
 

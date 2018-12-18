@@ -1,4 +1,4 @@
-(ns hanger.loggers
+(ns frame.loggers
   (:require
    [clojure.set :refer [difference]]
    #?@(:clj [[clojure.string :as str]
@@ -34,7 +34,7 @@
 
 (defn console
   [level & args]
-  (assert (contains? @loggers level) (str "hanger: log called with unknown level: " level))
+  (assert (contains? @loggers level) (str "frame: log called with unknown level: " level))
   (apply (level @loggers) args))
 
 

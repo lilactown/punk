@@ -1,6 +1,6 @@
-(ns hanger.utils
+(ns frame.utils
   (:require
-   [hanger.loggers :refer [console]]))
+   [frame.loggers :refer [console]]))
 
 (defn dissoc-in
   "Dissociates an entry from a nested associative structure returning a new
@@ -21,4 +21,4 @@
   [v]
   (if (vector? v)
     (first v)
-    (console :error "hanger: expected a vector, but got:" v)))
+    (console :error "frame: expected a vector, but got:" v)))

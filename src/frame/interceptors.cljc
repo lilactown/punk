@@ -1,7 +1,7 @@
-(ns hanger.interceptors
+(ns frame.interceptors
   (:require
-    [hanger.loggers :refer [console]]
-    [hanger.interop :refer [empty-queue debug-enabled?]]
+    [frame.loggers :refer [console]]
+    [frame.interop :refer [empty-queue debug-enabled?]]
     [clojure.set :as set]))
 
 
@@ -20,7 +20,7 @@
     (if-let [unknown-keys (seq (set/difference
                                 (-> m keys set)
                                 mandatory-interceptor-keys))]
-      (console :error "hanger: ->interceptor" m "has unknown keys:" unknown-keys)))
+      (console :error "frame: ->interceptor" m "has unknown keys:" unknown-keys)))
   {:id     (or id :unnamed)
    :before before
    :after  after })

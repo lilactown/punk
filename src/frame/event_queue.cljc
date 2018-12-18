@@ -1,11 +1,11 @@
-(ns hanger.event-queue
-  (:require [hanger.interop :refer [after-render empty-queue next-tick]]
-            [hanger.loggers :refer [console]]))
+(ns frame.event-queue
+  (:require [frame.interop :refer [after-render empty-queue next-tick]]
+            [frame.loggers :refer [console]]))
 
 
 ;; -- Router Loop ------------------------------------------------------------
 ;;
-;; A call to "hanger.core/dispatch" places an event on a queue for processing.
+;; A call to "frame.core/dispatch" places an event on a queue for processing.
 ;; A short time later, the handler registered to handle this event will be run.
 ;; What follows is the implementation of this process.
 ;;
@@ -103,13 +103,13 @@
   ;; register a callback function which will be called after each event is processed
   (add-post-event-callback [_ id callback-fn]
     (if (contains? post-event-callback-fns id)
-      (console :warn "hanger: overwriting existing post event call back with id:" id))
+      (console :warn "frame: overwriting existing post event call back with id:" id))
     (->> (assoc post-event-callback-fns id callback-fn)
          (set! post-event-callback-fns)))
 
   (remove-post-event-callback [_ id]
     (if-not (contains? post-event-callback-fns id)
-      (console :warn "hanger: could not remove post event call back with id:" id)
+      (console :warn "frame: could not remove post event call back with id:" id)
       (->> (dissoc post-event-callback-fns id)
            (set! post-event-callback-fns))))
 
@@ -155,7 +155,7 @@
               [:paused :add-event] [:paused #(-add-event this arg)]
               [:paused :resume] [:running #(-resume this)]
 
-              (throw (ex-info (str "hanger: router state transition not found. " fsm-state " " trigger)
+              (throw (ex-info (str "frame: router state transition not found. " fsm-state " " trigger)
                               {:fsm-state fsm-state, :trigger trigger})))]
 
         ;; The "case" above computed both the new FSM state, and the action. Now, make it happen.

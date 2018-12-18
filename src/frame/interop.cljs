@@ -1,4 +1,4 @@
-(ns hanger.interop
+(ns frame.interop
   (:require [goog.async.nextTick]))
 
 (def next-tick goog.async.nextTick)

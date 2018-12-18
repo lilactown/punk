@@ -1,6 +1,6 @@
-(ns hanger.std-interceptors
-  (:require [hanger.interceptors :refer [->interceptor]]
-            [hanger.loggers :refer [console]]))
+(ns frame.std-interceptors
+  (:require [frame.interceptors :refer [->interceptor]]
+            [frame.loggers :refer [console]]))
 
 (defn fx-handler->interceptor
   "Returns an interceptor which wraps the kind of event handler given to `reg-event-fx`.

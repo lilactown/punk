@@ -1,11 +1,11 @@
-(ns hanger.core
-  (:require [hanger.interceptors :as interceptor :refer [->interceptor]]
-            [hanger.utils :refer [first-in-vector]]
-            [hanger.interop :as interop :refer [empty-queue debug-enabled?
+(ns frame.core
+  (:require [frame.interceptors :as interceptor :refer [->interceptor]]
+            [frame.utils :refer [first-in-vector]]
+            [frame.interop :as interop :refer [empty-queue debug-enabled?
                                                 set-timeout!]]
-            [hanger.event-queue :as eq]
-            [hanger.loggers :refer [console]]
-            [hanger.std-interceptors :refer [fx-handler->interceptor]]))
+            [frame.event-queue :as eq]
+            [frame.loggers :refer [console]]
+            [frame.std-interceptors :refer [fx-handler->interceptor]]))
 
 ;;
 ;; Handling handlers
@@ -29,7 +29,7 @@
        (when (and required? (nil? handler))
          ;; ...otherwise you'd need to type-hint the `and`
          ;; with a ^boolean for DCE.
-         (console :error "hanger: no" (str kind) "handler registered for:" id)))
+         (console :error "frame: no" (str kind) "handler registered for:" id)))
      handler)))
 
 (defn- register-handler [frame kind id handler-fn]
@@ -37,7 +37,7 @@
     ;; This is in a separate when so Closure DCE can run
     (when (get-handler frame kind id false)
       ;; allow it, but warn. Happens on hot reloads.
-      (console :warn "hanger: overwriting" (str kind) "handler for:" id)))
+      (console :warn "frame: overwriting" (str kind) "handler for:" id)))
   (swap! (:registrar frame) assoc-in [kind id] handler-fn)
   handler-fn)
 
@@ -56,7 +56,7 @@
    (assert (handler-kinds kind))
    (if (get-handler kind id)
      (swap! (:registrar frame) update-in [kind] dissoc id)
-     (console :warn "hanger: can't clear" (str kind) "handler for"
+     (console :warn "frame: can't clear" (str kind) "handler for"
               (str id ". Handler not found.")))))
 
 
@@ -72,7 +72,7 @@
   (let [event-id  (first-in-vector event-v)]
     (if-let [interceptors  (get-handler frame :event event-id true)]
       (if *handling*
-        (console :error "hanger: while handling" *handling* ", dispatch-sync was called for" event-v ". You can't call dispatch-sync within an event handler.")
+        (console :error "frame: while handling" *handling* ", dispatch-sync was called for" event-v ". You can't call dispatch-sync within an event handler.")
         (binding [*handling*  event-v]
           (interceptor/execute event-v interceptors))))))
 
@@ -86,7 +86,7 @@
      (dispatch [:order-pizza {:supreme 2 :meatlovers 1 :veg 1})"
   [{:keys [event-queue]} event]
   (if (nil? event)
-    (throw (ex-info "hanger: you called \"dispatch\" without an event vector." {}))
+    (throw (ex-info "frame: you called \"dispatch\" without an event vector." {}))
     (eq/push event-queue event))
   nil)
 
@@ -123,11 +123,11 @@
   (register-handler frame :cofx id handler))
 
 (defn inject-cofx
-  "Given an `id`, and an optional, arbitrary `value`, returns an interceptor
+  "Given an `id`, and an optional, arbitrary `value`, returns an interceptor FACTORY
    whose `:before` adds to the `:coeffects` (map) by calling a pre-registered
    'coeffect handler' identified by the `id`.
    The previous association of a `coeffect handler` with an `id` will have
-   happened via a call to `hanger.core/reg-cofx` - generally on program startup.
+   happened via a call to `frame.core/reg-cofx` - generally on program startup.
    Within the created interceptor, this 'looked up' `coeffect handler` will
    be called (within the `:before`) with two arguments:
      - the current value of `:coeffects`
@@ -136,13 +136,13 @@
    Example Of how `inject-cofx` and `reg-cofx` work together
    ---------------------------------------------------------
    1. Early in app startup, you register a `coeffect handler` for `:datetime`:
-      (hanger.core/reg-cofx
+      (frame.core/reg-cofx
         :datetime                        ;; usage  (inject-cofx :datetime)
         (fn coeffect-handler
           [coeffect]
           (assoc coeffect :now (js/Date.))))   ;; modify and return first arg
    2. Later, add an interceptor to an -fx event handler, using `inject-cofx`:
-      (hanger.core/reg-event-fx        ;; we are registering an event handler
+      (frame.core/reg-event-fx        ;; we are registering an event handler
          :event-id
          [ ... (inject-cofx :datetime) ... ]    ;; <-- create an injecting interceptor
          (fn event-handler
@@ -229,7 +229,7 @@
             (doseq [[effect-key effect-value] (:effects context)]
               (if-let [effect-fn (get-handler frame :fx effect-key false)]
                 (effect-fn effect-value)
-                (console :error "hanger: no handler registered for effect:" effect-key ". Ignoring."))))))
+                (console :error "frame: no handler registered for effect:" effect-key ". Ignoring."))))))
 
 
 (defn register-default-fx [frame]
@@ -239,21 +239,21 @@
    (fn [value]
      (doseq [{:keys [ms] :as effect} (remove nil? value)]
        (if (or (empty? (:dispatch effect)) (not (number? ms)))
-         (console :error "hanger: ignoring bad :dispatch-later value:" effect)
+         (console :error "frame: ignoring bad :dispatch-later value:" effect)
          (set-timeout! #(dispatch frame (:dispatch effect)) ms)))))
   (reg-fx
    frame
    :dispatch
    (fn [value]
      (if-not (vector? value)
-       (console :error "hanger: ignoring bad :dispatch value. Expected a vector, but got:" value)
+       (console :error "frame: ignoring bad :dispatch value. Expected a vector, but got:" value)
        (dispatch frame value))))
   (reg-fx
    frame
    :dispatch-n
    (fn [value]
      (if-not (sequential? value)
-       (console :error "hanger: ignoring bad :dispatch-n value. Expected a collection, got got:" value)
+       (console :error "frame: ignoring bad :dispatch-n value. Expected a collection, got got:" value)
        (doseq [event (remove nil? value)] (dispatch frame event)))))
   (reg-fx
    frame
@@ -280,14 +280,14 @@
       (do
         ;; do a whole lot of development time checks
         (when-not (coll? interceptors)
-          (console :error "hanger: when registering" id ", expected a collection of interceptors, got:" interceptors))
+          (console :error "frame: when registering" id ", expected a collection of interceptors, got:" interceptors))
         (let [chain (make-chain interceptors)]
           (when (empty? chain)
-            (console :error "hanger: when registering" id ", given an empty interceptor chain"))
+            (console :error "frame: when registering" id ", given an empty interceptor chain"))
           (when-let [not-i (first (remove interceptor/interceptor? chain))]
             (if (fn? not-i)
-              (console :error "hanger: when registering" id ", got a function instead of an interceptor. Got:" not-i)
-              (console :error "hanger: when registering" id ", expected interceptors, but got:" not-i)))
+              (console :error "frame: when registering" id ", got a function instead of an interceptor. Got:" not-i)
+              (console :error "frame: when registering" id ", expected interceptors, but got:" not-i)))
           chain)))))
 
 (defn reg-event-fx
