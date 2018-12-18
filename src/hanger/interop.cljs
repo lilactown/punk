@@ -5,7 +5,7 @@
 
 (def empty-queue #queue [])
 
-;; (def after-render reagent.core/after-render)
+(def after-render next-tick)
 
 ;; Make sure the Google Closure compiler sees this as a boolean constant,
 ;; otherwise Dead Code Elimination won't happen in `:advanced` builds.

@@ -3,6 +3,7 @@
             [hanger.utils :refer [first-in-vector]]
             [hanger.interop :as interop :refer [empty-queue debug-enabled?
                                                 set-timeout!]]
+            [hanger.event-queue :as eq]
             [hanger.loggers :refer [console]]
             [hanger.std-interceptors :refer [fx-handler->interceptor]]))
 
@@ -75,8 +76,36 @@
         (binding [*handling*  event-v]
           (interceptor/execute event-v interceptors))))))
 
-(def dispatch handle-event)
+(defn dispatch
+  "Enqueue `event` for processing by event handling machinery.
+  `event` is a vector of length >= 1. The 1st element identifies the kind of event.
+  Note: the event handler is not run immediately - it is not run
+  synchronously. It will likely be run 'very soon', although it may be
+  added to the end of a FIFO queue which already contain events.
+  Usage:
+     (dispatch [:order-pizza {:supreme 2 :meatlovers 1 :veg 1})"
+  [{:keys [event-queue]} event]
+  (if (nil? event)
+    (throw (ex-info "hanger: you called \"dispatch\" without an event vector." {}))
+    (eq/push event-queue event))
+  nil)
 
+(defn dispatch-sync
+  "Synchronously (immediately) process `event`. Do not queue.
+  Generally, don't use this. Instead use `dispatch`. It is an error
+  to use `dispatch-sync` within an event handler.
+  Useful when any delay in processing is a problem:
+     1. the `:on-change` handler of a text field where we are expecting fast typing.
+     2  when initialising your app - see 'main' in todomvc examples
+     3. in a unit test where we don't want the action 'later'
+  Usage:
+     (dispatch-sync [:sing :falsetto 634])"
+  [{:keys [event-queue] :as frame} event-v]
+  (handle-event frame event-v)
+  ;; slightly ugly hack. Run the registered post event callbacks.
+  (eq/-call-post-event-callbacks event-queue event-v)  
+  ;; Ensure nil return. See https://github.com/Day8/re-frame/wiki/Beware-Returning-False
+  nil)
 
 
 ;;
@@ -218,27 +247,27 @@
    (fn [value]
      (doseq [{:keys [ms] :as effect} (remove nil? value)]
        (if (or (empty? (:dispatch effect)) (not (number? ms)))
-         (console :error "re-frame: ignoring bad :dispatch-later value:" effect)
-         (set-timeout! #(dispatch (:dispatch effect)) ms)))))
+         (console :error "hanger: ignoring bad :dispatch-later value:" effect)
+         (set-timeout! #(dispatch frame (:dispatch effect)) ms)))))
   (reg-fx
    frame
    :dispatch
    (fn [value]
      (if-not (vector? value)
-       (console :error "re-frame: ignoring bad :dispatch value. Expected a vector, but got:" value)
-       (dispatch value))))
+       (console :error "hanger: ignoring bad :dispatch value. Expected a vector, but got:" value)
+       (dispatch frame value))))
   (reg-fx
    frame
    :dispatch-n
    (fn [value]
      (if-not (sequential? value)
-       (console :error "re-frame: ignoring bad :dispatch-n value. Expected a collection, got got:" value)
-       (doseq [event (remove nil? value)] (dispatch event)))))
+       (console :error "hanger: ignoring bad :dispatch-n value. Expected a collection, got got:" value)
+       (doseq [event (remove nil? value)] (dispatch frame event)))))
   (reg-fx
    frame
    :deregister-event-handler
    (fn [value]
-     (let [clear-event (partial clear-handlers :event)]
+     (let [clear-event (partial clear-handlers frame :event)]
        (if (sequential? value)
          (doseq [event value] (clear-event event))
          (clear-event value)))))
@@ -324,4 +353,5 @@
                :db (atom {})}]
     (register-db-cofx frame)
     (register-default-fx frame)
-    frame))
+    (assoc frame
+           :event-queue (eq/event-queue (partial handle-event frame)))))
