@@ -2,7 +2,8 @@
   (:require [goog.object :as gobj]
             [clojure.string :as s]
             [clojure.datafy :as d]
-            [clojure.core.protocols :as p]))
+            [clojure.core.protocols :as p]
+            [hanger.core]))
 
 (def dbg> (partial js/console.log "punk>"))
 
