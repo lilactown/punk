@@ -309,7 +309,7 @@
     :event id
     (flatten-and-remove-nils
      id
-     [(map #(% frame) (:interceptors frame)) ;; default interceptors
+     [(:interceptors frame) ;; default interceptors
       (do-fx frame)
       interceptors
       (fx-handler->interceptor handler)]))))
@@ -319,22 +319,22 @@
 ;; Creating a new frame
 ;;
 
-(defn create-frame [& default-interceptors]
+(defn create-frame [& default-interceptor-factories]
   (let [frame {:registrar (atom {:event {}
                                  :fx {}
-                                 :cofx {}})
-               :interceptors default-interceptors}]
+                                 :cofx {}})}]
     (register-default-fx frame)
     (assoc frame
-           :event-queue (eq/event-queue (partial handle-event frame)))))
+           :event-queue (eq/event-queue (partial handle-event frame))
+           :interceptors (map #(% frame) default-interceptor-factories))))
 
 #_(def frame (create-frame (inject-cofx :db)))
 
 #_(reg-event-fx frame :foo (fn [cofx ev]
                              (js/console.log cofx ev)
-                             {:db {:asdf "bar" }}))
+                             {:db (inc (:db cofx))}))
 
-#_(def app-db (atom {}))
+#_(def app-db (atom 0))
 
 #_(reg-cofx frame :db (fn [cofx] (assoc cofx :db @app-db)))
 
