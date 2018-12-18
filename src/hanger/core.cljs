@@ -161,32 +161,24 @@
    Instead, the interceptor created by this function is a way to 'inject'
    'necessary resources' into the `:coeffects` (map) subsequently given
    to the event handler at call time."
-  ([frame id]
-  (->interceptor
-    :id      :coeffects
-    :before  (fn coeffects-before
-               [context]
-               (if-let [handler (get-handler frame :cofx id)]
-                 (update context :coeffects handler)
-                 (console :error "No cofx handler registered for" id)))))
-  ([frame id value]
-   (->interceptor
-     :id     :coeffects
-     :before  (fn coeffects-before
-                [context]
-                (if-let [handler (get-handler frame :cofx id)]
-                  (update context :coeffects handler value)
-                  (console :error "No cofx handler registered for" id))))))
-
-(defn register-db-cofx [frame]
-  (reg-cofx
-   frame
-   :db
-   (fn db-coeffects-handler
-     [coeffects]
-     (assoc coeffects :db @(:db frame)))))
-
-(defn inject-db [frame] (inject-cofx frame :db))
+  ([id]
+   (fn [frame]
+     (->interceptor
+      :id      :coeffects
+      :before  (fn coeffects-before
+                 [context]
+                 (if-let [handler (get-handler frame :cofx id)]
+                   (update context :coeffects handler)
+                   (console :error "No cofx handler registered for" id))))))
+  ([id value]
+   (fn [frame]
+     (->interceptor
+      :id     :coeffects
+      :before  (fn coeffects-before
+                 [context]
+                 (if-let [handler (get-handler frame :cofx id)]
+                   (update context :coeffects handler value)
+                   (console :error "No cofx handler registered for" id)))))))
 
 
 ;;
@@ -216,7 +208,7 @@
 (defn do-fx
   "An interceptor whose `:after` actions the contents of `:effects`. As a result,
   this interceptor is Domino 3.
-  This interceptor is silently added (by reg-event-db etc) to the front of
+  This interceptor is silently added (by reg-event-fx etc) to the front of
   interceptor chains for all events.
   For each key in `:effects` (a map), it calls the registered `effects handler`
   (see `reg-fx` for registration of effect handlers).
@@ -270,14 +262,7 @@
      (let [clear-event (partial clear-handlers frame :event)]
        (if (sequential? value)
          (doseq [event value] (clear-event event))
-         (clear-event value)))))
-  (reg-fx
-   frame
-   :db
-   (fn [value]
-     (let [app-db (:db frame)]
-       (if-not (identical? @app-db value)
-         (reset! app-db value))))))
+         (clear-event value))))))
 
 
 ;;
@@ -324,34 +309,62 @@
     :event id
     (flatten-and-remove-nils
      id
-     [(inject-db frame) (do-fx frame)
+     [(map #(% frame) (:interceptors frame)) ;; default interceptors
+      (do-fx frame)
       interceptors
       (fx-handler->interceptor handler)]))))
-
-
-;;
-;; Subscriptions
-;;
-
-(defn reg-sub [frame query-id computation-fn]
-  )
-
-(defn reg-reaction [frame query-id side-effect]
-  )
 
 
 ;;
 ;; Creating a new frame
 ;;
 
-(defn create-frame []
+(defn create-frame [& default-interceptors]
   (let [frame {:registrar (atom {:event {}
                                  :fx {}
-                                 :cofx {}
-                                 :sub {}
-                                 :reactions {}})
-               :db (atom {})}]
-    (register-db-cofx frame)
+                                 :cofx {}})
+               :interceptors default-interceptors}]
     (register-default-fx frame)
     (assoc frame
            :event-queue (eq/event-queue (partial handle-event frame)))))
+
+#_(def frame (create-frame (inject-cofx :db)))
+
+#_(reg-event-fx frame :foo (fn [cofx ev]
+                             (js/console.log cofx ev)
+                             {:db {:asdf "bar" }}))
+
+#_(def app-db (atom {}))
+
+#_(reg-cofx frame :db (fn [cofx] (assoc cofx :db @app-db)))
+
+#_(reg-fx frame :db (fn [value] (reset! app-db value)))
+
+#_(dispatch frame [:foo])
+
+;;
+;; -- Event Processing Callbacks  ---------------------------------------------
+;;
+
+(defn add-post-event-callback
+  "Registers a function `f` to be called after each event is processed
+   `f` will be called with two arguments:
+    - `event`: a vector. The event just processed.
+    - `queue`: a PersistentQueue, possibly empty, of events yet to be processed.
+   This is useful in advanced cases like:
+     - you are implementing a complex bootstrap pipeline
+     - you want to create your own handling infrastructure, with perhaps multiple
+       handlers for the one event, etc.  Hook in here.
+     - libraries providing 'isomorphic javascript' rendering on  Nodejs or Nashorn.
+  'id' is typically a keyword. Supplied at \"add time\" so it can subsequently
+  be used at \"remove time\" to get rid of the right callback.
+  "
+  ([frame f]
+   (add-post-event-callback f f))   ;; use f as its own identifier
+  ([frame id f]
+   (eq/add-post-event-callback (:event-queue frame) id f)))
+
+
+(defn remove-post-event-callback
+  [frame id]
+  (eq/remove-post-event-callback (:event-queue frame) id))
