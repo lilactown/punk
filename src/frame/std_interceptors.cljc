@@ -2,6 +2,11 @@
   (:require [frame.interceptors :refer [->interceptor]]
             [frame.loggers :refer [console]]))
 
+
+;;
+;; -- Interceptor Factories ---------------------------------------------------------------
+;;
+
 (defn fx-handler->interceptor
   "Returns an interceptor which wraps the kind of event handler given to `reg-event-fx`.
   These handlers take two arguments;  `coeffects` and `event`, and they return `effects`.
@@ -24,3 +29,17 @@
                new-context))))
 
 
+(defn ctx-handler->interceptor
+  "Returns an interceptor which wraps the kind of event handler given to `reg-event-ctx`.
+  These advanced handlers take one argument: `context` and they return a modified `context`.
+  Example:
+      (fn [context]
+         (enqueue context [more interceptors]))"
+  [handler-fn]
+  (->interceptor
+   :id     :ctx-handler
+   :before (fn ctx-handler-before
+             [context]
+             (let [new-context
+                   (handler-fn context)]
+               new-context))))
