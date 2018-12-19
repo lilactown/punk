@@ -66,33 +66,96 @@
    {:punk/dispatch [:punk.browser/history-back]}))
 
 ;;
-;; Browser panes
+;; Data views
 ;;
+
+(defnc MapView [{:keys [data on-next] :as props}]
+  (when (not (nil? data))
+    [:div (dissoc props :on-next :data)
+     [:<>
+      [:div {:style {:display "flex"
+                     :border-bottom "1px solid #999"
+                     :padding-bottom "3px"
+                     :margin-bottom "3px"}}
+       [:div {:style {:flex 1}} "key"]
+       [:div {:style {:flex 2}} "value"]]
+      (for [[key v] data]
+        [:div {:style {:display "flex"}
+               :key key
+               :class "item"
+               :on-click #(on-next data key v)}
+         [:div {:style {:flex 1}}
+          (prn-str key)]
+         [:div {:style {:flex 2}}
+          (prn-str v)]])]]))
 
 (defnc CollView [{:keys [data on-next] :as props}]
   (when (not (nil? data))
-    [:div (if (coll? data)
-            (dissoc props :on-next :data)
-            (-> props (dissoc :on-next :data)
-                (assoc :class "nohover")))
-     (if (coll? data)
-       [:<>
-        [:div {:style {:display "flex"
-                       :border-bottom "1px solid #999"
-                       :padding-bottom "3px"
-                       :margin-bottom "3px"}}
-         [:div {:style {:flex 1}} "key"]
-         [:div {:style {:flex 2}} "value"]]
-        (for [[key v] (with-index data)]
-          [:div {:style {:display "flex"}
-                 :key key
-                 :class "item"
-                 :on-click #(on-next data key v)}
-           [:div {:style {:flex 1}}
-            (prn-str key)]
-           [:div {:style {:flex 2}}
-            (prn-str v)]])]
-       [:div (prn-str data)])]))
+    [:div (dissoc props :on-next :data)
+     [:<>
+      [:div {:style {:display "flex"
+                     :border-bottom "1px solid #999"
+                     :padding-bottom "3px"
+                     :margin-bottom "3px"}}
+       [:div {:style {:flex 1}} "idx"]
+       [:div {:style {:flex 2}} "value"]]
+      (for [[key v] (map-indexed vector data)]
+        [:div {:style {:display "flex"}
+               :key key
+               :class "item"
+               :on-click #(on-next data key v)}
+         [:div {:style {:flex 1}}
+          (prn-str key)]
+         [:div {:style {:flex 2}}
+          (prn-str v)]])]]))
+
+(defnc SetView [{:keys [data on-next] :as props}]
+  (when (not (nil? data))
+    [:div (dissoc props :on-next :data)
+     [:<>
+      [:div {:style {:display "flex"
+                     :border-bottom "1px solid #999"
+                     :padding-bottom "3px"
+                     :margin-bottom "3px"}}
+       [:div {:style {:flex 2}} "value"]]
+      (for [v (sort data)]
+        [:div {:style {:display "flex"}
+               :key v
+               :class "item"
+               :on-click #(on-next data key v)}
+         [:div {:style {:flex 2}}
+          (prn-str v)]])]]))
+
+(defnc EdnView [{:keys [data on-next] :as props}]
+  [:div (prn-str data)])
+
+(def views
+  [{:id :punk.view/nil
+    :match nil?
+    :view nil}
+
+   {:id :punk.view/map
+    :match map?
+    :view MapView}
+
+   {:id :punk.view/set
+    :match set?
+    :view SetView}
+
+   {:id :punk.view/coll
+    :match coll?
+    :view CollView}
+
+   {:id :punk.view/edn
+    :match any?
+    :view EdnView}])
+
+(defn match-view [views data]
+  (:view (first (filter #((:match %) data) views))))
+
+;;
+;; Browser panes
+;;
 
 (defnc Style [{:keys [children]}]
   [:style {:dangerouslySetInnerHTML #js {:__html (s/join "\n" children)}}])
@@ -104,17 +167,17 @@
                    :flex-direction "column"}}
      ;; css
      [Style
-      "#current { overflow: scroll }"
+      "#current { overflow: auto }"
       "#current .item { cursor: pointer; padding: 3px; margin: 3px; }"
       "#current .item:hover { background-color: #eee; }"
 
-      "#next { overflow: scroll }"
+      "#next { overflow: auto }"
       "#next { cursor: pointer; padding: 3px; margin: 3px; }"
       "#next:hover { background-color: #eee; }"
       "#next.nohover { cursor: initial; }"
       "#next.nohover:hover { background-color: initial; }"
 
-      "#log { overflow: scroll }"
+      "#log { overflow: auto }"
       "#log .item { cursor: pointer; padding: 3px 0; margin: 3px 0; }"
       "#log .item:hover { background-color: #eee; }"]
      ;; Next
@@ -123,18 +186,20 @@
                     :position "relative"
                     :display "flex"
                     :flex-direction "column"}}
-      [CollView {:data (-> state :next :datafied)
-                    :id "next"
-                    :on-next #(dispatch [:punk.ui.browser/view-next])}]]
+      [(match-view views (-> state :next :datafied))
+       {:data (-> state :next :datafied)
+        :id "next"
+        :on-next #(dispatch [:punk.ui.browser/view-next])}]]
      ;; Current
      [:h3 "Current"]
      [:div {:style {:flex 1
                     :position "relative"
                     :display "flex"
                     :flex-direction "column"}}
-      [CollView {:data (-> state :current :datafied)
-                    :id "current"
-                    :on-next #(dispatch [:punk.ui.browser/nav-to %1 %2 %3])}]]
+      [(match-view views (-> state :current :datafied))
+       {:data (-> state :current :datafied)
+        :id "current"
+        :on-next #(dispatch [:punk.ui.browser/nav-to %1 %2 %3])}]]
      ;; Controls
      [:div
       [:button {:type "button"

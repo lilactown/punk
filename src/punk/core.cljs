@@ -130,7 +130,7 @@
 ;; External events and subscriptions
 ;;
 
-(defn tap-fn [x] (f/dispatch punk-frame [:punk.browser/add-entry x]))
+(defn tap-fn [x] (f/dispatch punk-frame [:punk.browser/add-entry (dataficate x)]))
 
 (defn remove-taps! []
   (remove-tap tap-fn))
