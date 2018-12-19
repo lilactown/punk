@@ -31,7 +31,6 @@
   default
   (with-index [x] x))
 
-
 ;;
 ;; UI Events
 ;;
@@ -66,12 +65,11 @@
  (fn [_ [_ x]]
    {:punk/dispatch [:punk.browser/history-back]}))
 
-
 ;;
-;; App panes
+;; Browser panes
 ;;
 
-(defnc View [{:keys [data on-next] :as props}]
+(defnc CollView [{:keys [data on-next] :as props}]
   (when (not (nil? data))
     [:div (if (coll? data)
             (dissoc props :on-next :data)
@@ -99,7 +97,7 @@
 (defnc Style [{:keys [children]}]
   [:style {:dangerouslySetInnerHTML #js {:__html (s/join "\n" children)}}])
 
-(defnc App [_]
+(defnc Browser [_]
   (let [state (<-deref (.-PUNK_DB js/window))]
     [:div {:style {:display "flex"
                    :height "100%"
@@ -125,18 +123,18 @@
                     :position "relative"
                     :display "flex"
                     :flex-direction "column"}}
-      [View {:data (-> state :next :datafied)
-             :id "next"
-             :on-next #(dispatch [:punk.ui.browser/view-next])}]]
+      [CollView {:data (-> state :next :datafied)
+                    :id "next"
+                    :on-next #(dispatch [:punk.ui.browser/view-next])}]]
      ;; Current
      [:h3 "Current"]
      [:div {:style {:flex 1
                     :position "relative"
                     :display "flex"
                     :flex-direction "column"}}
-      [View {:data (-> state :current :datafied)
-             :id "current"
-             :on-next #(dispatch [:punk.ui.browser/nav-to %1 %2 %3])}]]
+      [CollView {:data (-> state :current :datafied)
+                    :id "current"
+                    :on-next #(dispatch [:punk.ui.browser/nav-to %1 %2 %3])}]]
      ;; Controls
      [:div
       [:button {:type "button"
@@ -144,8 +142,8 @@
                 :disabled (empty? (:history state))
                 :on-click #(dispatch [:punk.ui.browser/back])} "<"]]
 
-     ;; Log
-     [:h3 "Log"]
+     ;; Entrie
+     [:h3 "Entries"]
      [:div {:style {:flex 1
                     :position "relative"
                     :display "flex"
@@ -166,4 +164,4 @@
                         (. new-container setAttribute "id" "punk")
                         (-> js/document .-body (.appendChild new-container))
                         new-container))]
-    (react-dom/render (hx/f [App]) container)))
+    (react-dom/render (hx/f [Browser]) container)))

@@ -121,7 +121,8 @@
  (fn [{:keys [db]} _]
    {:db (-> db
             (update :history pop)
-            (assoc :current (-> db :history peek)))}))
+            (assoc :current (-> db :history peek)
+                   :next nil))}))
 
 #_(f/dispatch punk-frame [:punk.browser/add-entry "foo"])
 
