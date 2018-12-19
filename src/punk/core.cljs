@@ -3,7 +3,8 @@
             [clojure.string :as s]
             [clojure.datafy :as d]
             [clojure.core.protocols :as p]
-            [frame.core :as f]))
+            [frame.core :as f]
+            [clojure.datafy :as d]))
 
 (def dbg> (partial js/console.log "punk>"))
 
@@ -30,41 +31,21 @@
     :else x))
 
 ;;
-;; Data structures
-;;
-
-(defprotocol WithIndex
-  (with-index [this]))
-
-(extend-protocol WithIndex
-  cljs.core/PersistentVector
-  (with-index [v] (map-indexed vector v))
-
-  cljs.core/PersistentHashSet
-  (with-index [s] (map-indexed vector s))
-
-  cljs.core/List
-  (with-index [s] (map-indexed vector s))
-
-  cljs.core/LazySeq
-  (with-index [s] (map-indexed vector s))
-
-  default
-  (with-index [x] x))
-
-;;
 ;; App state
 ;;
 
-(defonce punk-db (atom {:entries []
-                        :history []
-                        :current nil
-                        :next {:coll nil
-                               :k nil
-                               :v nil}}))
+(defonce punk-db (atom {:entries [{:value {:foo "bar"}
+                               :datafied {:foo "bar"}}]
+                    :history []
+                    :current nil
+                    :next nil}))
 
 (defonce punk-frame (f/create-frame
                     (f/inject-cofx :db)))
+
+(set! (.-PUNK_DB js/window) punk-db)
+
+(set! (.-PUNK_FRAME js/window) punk-frame)
 
 (f/reg-cofx
  punk-frame :db
@@ -82,12 +63,16 @@
     (f x)
     x))
 
-(def debug
+(def debug-db
   (frame.interceptors/->interceptor
-   :id :punk/debug
-   :before (dbg (partial js/console.log "before> "))
-   :after (dbg (partial js/console.log "after> "))))
+   :id :punk/debug-db
+   :before (dbg (fn [x] (js/console.log "db/before> " (-> x :coeffects :db))))
+   :after (dbg (fn [x] (js/console.log "db/after> " (-> x :effects :db))))))
 
+(def debug-event
+  (frame.interceptors/->interceptor
+   :id :punk/debug-event
+   :before (dbg (fn [x] (js/console.log "event> " (-> x :coeffects :event))))))
 
 ;;
 ;; Punk events
@@ -95,9 +80,48 @@
 
 (f/reg-event-fx
  punk-frame :punk/add-entry
- [debug]
+ [#_debug-db debug-event]
  (fn [cofx [_ x]]
-   {:db (update (:db cofx) :entries conj x)}))
+   {:db (update (:db cofx) :entries conj {:value x
+                                          :datafied (d/datafy x)})}))
+
+(f/reg-event-fx
+ punk-frame :punk/view-entry
+ [#_debug-db debug-event]
+ (fn [{:keys [db]} [_ x]]
+   {:db (assoc db
+               :current x
+               :next nil
+               :history [])}))
+
+(f/reg-event-fx
+ punk-frame :punk/nav-to
+ [#_debug-db debug-event]
+ (fn [{:keys [db]} [_ coll k v]]
+   (let [nv (d/nav coll k v)]
+     {:db (-> db
+              (assoc :next {:value nv
+                            :datafied (d/datafy nv)}))})))
+
+(f/reg-event-fx
+ punk-frame :punk/view-next
+ [#_debug-db debug-event]
+ (fn [{:keys [db]} _]
+   {:db (-> db
+            (assoc
+             :current (:next db)
+             :next nil)
+            (update
+             :history
+             conj (:current db)))}))
+
+(f/reg-event-fx
+ punk-frame :punk/history-back
+ [#_debug-db debug-event]
+ (fn [{:keys [db]} _]
+   {:db (-> db
+            (update :history pop)
+            (assoc :current (-> db :history peek)))}))
 
 #_(f/dispatch punk-frame [:punk/add-entry "foo"])
 
@@ -112,11 +136,3 @@
 
 (defn remove-taps! []
   (remove-tap tap-fn))
-
-#_(add-taps!)
-
-#_(tap> 2)
-
-;;
-;; Connection adapter
-;;

@@ -1,13 +1,71 @@
 (ns punk.ui.core
   (:require [hx.react :as hx :refer [defnc]]
             [hx.utils]
-            [hx.react.hooks :refer [<-state <-effect]]
+            [hx.react.hooks :refer [<-deref]]
             ["react-is" :as react-is]
             ["react-dom" :as react-dom]
             [goog.object :as gobj]
             [clojure.string :as s]
-            [clojure.datafy :as d]
-            [clojure.core.protocols :as p]))
+            [frame.core :as f]))
+
+;;
+;; Data structures
+;;
+
+(defprotocol WithIndex
+  (with-index [this]))
+
+(extend-protocol WithIndex
+  cljs.core/PersistentVector
+  (with-index [v] (map-indexed vector v))
+
+  cljs.core/PersistentHashSet
+  (with-index [s] (map-indexed vector s))
+
+  cljs.core/List
+  (with-index [s] (map-indexed vector s))
+
+  cljs.core/LazySeq
+  (with-index [s] (map-indexed vector s))
+
+  default
+  (with-index [x] x))
+
+
+;;
+;; UI Events
+;;
+
+(def ui-frame (f/create-frame))
+
+(def dispatch #(f/dispatch ui-frame %))
+
+;; dispatch to the app
+(f/reg-fx
+ ui-frame :punk/dispatch
+ (fn punk-dispatch-fx [v]
+   (f/dispatch (.-PUNK_FRAME js/window) v)))
+
+(f/reg-event-fx
+ ui-frame :punk.ui/view-entry
+ (fn [_ [_ x :as ev]]
+   {:punk/dispatch [:punk/view-entry x]}))
+
+(f/reg-event-fx
+ ui-frame :punk.ui/nav-to
+ (fn [_ [_ coll k v]]
+   {:punk/dispatch [:punk/nav-to coll k v]}))
+
+(f/reg-event-fx
+ ui-frame :punk.ui/view-next
+ (fn [_ [_ x]]
+   {:punk/dispatch [:punk/view-next]}))
+
+(f/reg-event-fx
+ ui-frame :punk.ui/back
+ (fn [_ [_ x]]
+   {:punk/dispatch [:punk/history-back]}))
+
 
 ;;
 ;; App panes
@@ -40,25 +98,9 @@
   [:style {:dangerouslySetInnerHTML #js {:__html (s/join "\n" children)}}])
 
 (defnc App [_]
-  (let [state (<-state {:log [{:foo ["bar" "baz"]
-                               :bar {:baz 42}}]
-                        :history []
-                        :current {:foo ["bar" "baz"]
-                                  :bar {:baz 42}}
-                        :next {:coll nil
-                               :k nil
-                               :v nil}})
-        tap-fn (fn [x]
-                 (swap! state update :log conj (dataficate x)))]
-    ;; add tap listener
-    (<-effect (fn []
-                #_(dbg> "Adding tap")
-                (add-tap tap-fn)
-                (fn []
-                  #_(dbg> "removing tap")
-                  (remove-tap tap-fn)))
-              #_[state])
-
+  (let [state (<-deref (.-PUNK_DB js/window))
+        ;; dispatch #(f/dispatch (.-PUNK_FRAME js/window) %)
+        ]
     [:div {:style {:display "flex"
                    :height "100%"
                    :flex-direction "column"}}
@@ -81,41 +123,24 @@
                     :position "relative"
                     :display "flex"
                     :flex-direction "column"}}
-      [View {:data (d/datafy
-                    (d/nav (-> @state :next :coll)
-                           (-> @state :next :k)
-                           (-> @state :next :v)))
+      [View {:data (-> state :next :datafied)
              :id "next"
-             :on-next #(swap! state
-                              assoc
-                              :history (conj (:history @state)
-                                             (:current @state))
-                              :current %1
-                              :next {:coll nil
-                                     :k nil
-                                     :v nil})}]]
+             :on-next #(dispatch [:punk.ui/view-next])}]]
      ;; Current
      [:h3 "Current"]
      [:div {:style {:flex 1
                     :position "relative"
                     :display "flex"
                     :flex-direction "column"}}
-      [View {:data (d/datafy (:current @state))
+      [View {:data (-> state :current :datafied)
              :id "current"
-             :on-next #(swap! state assoc
-                              :next
-                              {:coll %1
-                               :k %2
-                               :v %3})}]]
+             :on-next #(dispatch [:punk.ui/nav-to %1 %2 %3])}]]
      ;; Controls
      [:div
       [:button {:type "button"
                 :style {:width "60px"}
-                :disabled (empty? (:history @state))
-                :on-click #(swap! state assoc
-                                  :current (peek (:history @state))
-                                  :history (pop (:history @state))
-                                  :next {:coll nil :k nil :v nil})}"<"]]
+                :disabled (empty? (:history state))
+                :on-click #(dispatch [:punk.ui/back])} "<"]]
 
      ;; Log
      [:h3 "Log"]
@@ -124,12 +149,10 @@
                     :display "flex"
                     :flex-direction "column"}
             :id "log"}
-      (for [datum (:log @state)]
-        [:div {:on-click #(swap! state assoc
-                                 :current datum
-                                 :history [])
+      (for [entry (:entries state)]
+        [:div {:on-click #(dispatch [:punk.ui/view-entry entry])
                :class "item"}
-         (prn-str (d/datafy datum))])]]))
+         (prn-str (:datafied entry))])]]))
 
 #_(tap> #js {:asdf "jkl"})
 #_(tap> (js/Date.))
@@ -138,9 +161,7 @@
 (defn start! []
   (let [container (or (. js/document getElementById "punk")
                       (let [new-container (. js/document createElement "div")]
-                        (dbg> "Creating new container")
                         (. new-container setAttribute "id" "punk")
                         (-> js/document .-body (.appendChild new-container))
                         new-container))]
-    (dbg> "starting")
     (react-dom/render (hx/f [App]) container)))
