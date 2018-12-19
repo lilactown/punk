@@ -163,6 +163,8 @@
        #js {:i "current" :x 0 :y 6 :w 12 :h 6}
        #js {:i "entries" :x 0 :y 12 :w 12 :h 6}])
 
+(def GridLayoutWithWidth (GridLayout/WidthProvider GridLayout))
+
 (defnc Browser [_]
   (let [state (<-deref (.-PUNK_DB js/window))]
     [:div {:style {:height "100%"}
@@ -208,9 +210,11 @@
            "}")
       "#log .item { cursor: pointer; padding: 3px 0; margin: 3px 0; }"
       "#log .item:hover { background-color: #44475a; }"]
-     [GridLayout {:class "layout" :layout layout :cols 12
-                  :rowHeight 30
-                  :width 800}
+     [GridLayoutWithWidth
+      {:class "layout"
+       :layout layout
+       :cols 12
+       :rowHeight 30}
       ;; Next
       [:div {:key "next" :id "next-grid"}
        [:h3 "Next"]
