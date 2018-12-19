@@ -1,10 +1,8 @@
 (ns punk.ui.core
   (:require [hx.react :as hx :refer [defnc]]
-            [hx.utils]
             [hx.react.hooks :refer [<-deref]]
-            ["react-is" :as react-is]
             ["react-dom" :as react-dom]
-            [goog.object :as gobj]
+            ["react-grid-layout" :as GridLayout]
             [clojure.string :as s]
             [frame.core :as f]))
 
@@ -160,12 +158,15 @@
 (defnc Style [{:keys [children]}]
   [:style {:dangerouslySetInnerHTML #js {:__html (s/join "\n" children)}}])
 
+(def layout
+  #js [#js {:i "next" :x 0 :y 0 :w 12 :h 6}
+       #js {:i "current" :x 0 :y 6 :w 12 :h 6}
+       #js {:i "entries" :x 0 :y 12 :w 12 :h 6}])
+
 (defnc Browser [_]
   (let [state (<-deref (.-PUNK_DB js/window))]
-    [:div {:style {:display "flex"
-                   :height "100%"
-                   :flex-direction "column"}}
-     ;; css
+    [:div {:style {:height "100%"} #_{:position "absolute"
+                   :top 0 :left 0}}
      [Style
       "#current { overflow: auto }"
       "#current .item { cursor: pointer; padding: 3px; margin: 3px; }"
@@ -180,48 +181,42 @@
       "#log { overflow: auto }"
       "#log .item { cursor: pointer; padding: 3px 0; margin: 3px 0; }"
       "#log .item:hover { background-color: #eee; }"]
-     ;; Next
-     [:h3 "Next"]
-     [:div {:style {:flex 1
-                    :position "relative"
-                    :display "flex"
-                    :flex-direction "column"}}
-      [(match-view views (-> state :next :datafied))
-       {:data (-> state :next :datafied)
-        :id "next"
-        :on-next #(dispatch [:punk.ui.browser/view-next])}]]
-     ;; Current
-     [:h3 "Current"]
-     [:div {:style {:flex 1
-                    :position "relative"
-                    :display "flex"
-                    :flex-direction "column"}}
-      [(match-view views (-> state :current :datafied))
-       {:data (-> state :current :datafied)
-        :id "current"
-        :on-next #(dispatch [:punk.ui.browser/nav-to %1 %2 %3])}]]
-     ;; Controls
-     [:div
-      [:button {:type "button"
-                :style {:width "60px"}
-                :disabled (empty? (:history state))
-                :on-click #(dispatch [:punk.ui.browser/back])} "<"]]
-
-     ;; Entrie
-     [:h3 "Entries"]
-     [:div {:style {:flex 1
-                    :position "relative"
-                    :display "flex"
-                    :flex-direction "column"}
-            :id "log"}
-      (for [entry (:entries state)]
-        [:div {:on-click #(dispatch [:punk.ui.browser/view-entry entry])
-               :class "item"}
-         (prn-str (:datafied entry))])]]))
-
-#_(tap> #js {:asdf "jkl"})
-#_(tap> (js/Date.))
-#_(tap> (js/RegExp.))
+     [GridLayout {:class "layout" :layout layout :cols 12
+                  :rowHeight 30
+                  :width 800}
+      ;; Next
+      [:div {:key "next"}
+       [:h3 "Next"]
+       [:div {:style {:display "flex"
+                      :flex-direction "column"}}
+        [(match-view views (-> state :next :datafied))
+         {:data (-> state :next :datafied)
+          :id "next"
+          :on-next #(dispatch [:punk.ui.browser/view-next])}]]]
+      ;; Current
+      [:div {:key "current"}
+       [:h3 "Current"]
+       [:div {:style {:display "flex"
+                      :flex-direction "column"}}
+        [(match-view views (-> state :current :datafied))
+         {:data (-> state :current :datafied)
+          :id "current"
+          :on-next #(dispatch [:punk.ui.browser/nav-to %1 %2 %3])}]]
+       ;; Controls
+       [:div
+        [:button {:type "button"
+                  :style {:width "60px"}
+                  :disabled (empty? (:history state))
+                  :on-click #(dispatch [:punk.ui.browser/back])} "<"]]];; Entrie
+      [:div {:key "entries"}
+       [:h3 "Entries"]
+       [:div {:style {:display "flex"
+                      :flex-direction "column"}
+              :id "log"}
+        (for [[idx entry] (reverse (map-indexed vector (:entries state)))]
+          [:div {:on-click #(dispatch [:punk.ui.browser/view-entry entry])
+                 :class "item"}
+           idx " " (prn-str (:datafied entry))])]]]]))
 
 (defn start! []
   (let [container (or (. js/document getElementById "punk")
