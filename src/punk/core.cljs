@@ -131,8 +131,9 @@
 
 (defn tap-fn [x] (f/dispatch punk-frame [:punk/add-entry x]))
 
-(defn add-taps! []
-  (add-tap tap-fn))
-
 (defn remove-taps! []
   (remove-tap tap-fn))
+
+(defn add-taps! []
+  (remove-taps!)
+  (add-tap tap-fn))

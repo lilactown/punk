@@ -2,7 +2,6 @@
   (:require [punk.core :as punk]
             [punk.ui.core :as punk-ui]))
 
-(punk/remove-taps!)
 (punk/add-taps!)
 
 (punk-ui/start!)
