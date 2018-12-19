@@ -79,14 +79,14 @@
 ;;
 
 (f/reg-event-fx
- punk-frame :punk/add-entry
+ punk-frame :punk.browser/add-entry
  [#_debug-db debug-event]
  (fn [cofx [_ x]]
    {:db (update (:db cofx) :entries conj {:value x
                                           :datafied (d/datafy x)})}))
 
 (f/reg-event-fx
- punk-frame :punk/view-entry
+ punk-frame :punk.browser/view-entry
  [#_debug-db debug-event]
  (fn [{:keys [db]} [_ x]]
    {:db (assoc db
@@ -95,7 +95,7 @@
                :history [])}))
 
 (f/reg-event-fx
- punk-frame :punk/nav-to
+ punk-frame :punk.browser/nav-to
  [#_debug-db debug-event]
  (fn [{:keys [db]} [_ coll k v]]
    (let [nv (d/nav coll k v)]
@@ -104,7 +104,7 @@
                             :datafied (d/datafy nv)}))})))
 
 (f/reg-event-fx
- punk-frame :punk/view-next
+ punk-frame :punk.browser/view-next
  [#_debug-db debug-event]
  (fn [{:keys [db]} _]
    {:db (-> db
@@ -116,20 +116,20 @@
              conj (:current db)))}))
 
 (f/reg-event-fx
- punk-frame :punk/history-back
+ punk-frame :punk.browser/history-back
  [#_debug-db debug-event]
  (fn [{:keys [db]} _]
    {:db (-> db
             (update :history pop)
             (assoc :current (-> db :history peek)))}))
 
-#_(f/dispatch punk-frame [:punk/add-entry "foo"])
+#_(f/dispatch punk-frame [:punk.browser/add-entry "foo"])
 
 ;;
 ;; External events and subscriptions
 ;;
 
-(defn tap-fn [x] (f/dispatch punk-frame [:punk/add-entry x]))
+(defn tap-fn [x] (f/dispatch punk-frame [:punk.browser/add-entry x]))
 
 (defn remove-taps! []
   (remove-tap tap-fn))

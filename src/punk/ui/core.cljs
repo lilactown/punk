@@ -49,22 +49,22 @@
 (f/reg-event-fx
  ui-frame :punk.ui/view-entry
  (fn [_ [_ x :as ev]]
-   {:punk/dispatch [:punk/view-entry x]}))
+   {:punk/dispatch [:punk.browser/view-entry x]}))
 
 (f/reg-event-fx
  ui-frame :punk.ui/nav-to
  (fn [_ [_ coll k v]]
-   {:punk/dispatch [:punk/nav-to coll k v]}))
+   {:punk/dispatch [:punk.browser/nav-to coll k v]}))
 
 (f/reg-event-fx
  ui-frame :punk.ui/view-next
  (fn [_ [_ x]]
-   {:punk/dispatch [:punk/view-next]}))
+   {:punk/dispatch [:punk.browser/view-next]}))
 
 (f/reg-event-fx
  ui-frame :punk.ui/back
  (fn [_ [_ x]]
-   {:punk/dispatch [:punk/history-back]}))
+   {:punk/dispatch [:punk.browser/history-back]}))
 
 
 ;;
@@ -73,7 +73,10 @@
 
 (defnc View [{:keys [data on-next] :as props}]
   (when (not (nil? data))
-    [:div (dissoc props :on-next :data)
+    [:div (if (coll? data)
+            (dissoc props :on-next :data)
+            (-> props (dissoc :on-next :data)
+                (assoc :class "nohover")))
      (if (coll? data)
        [:<>
         [:div {:style {:display "flex"
@@ -91,16 +94,13 @@
             (prn-str key)]
            [:div {:style {:flex 2}}
             (prn-str v)]])]
-       [:div {:on-click #(on-next data nil nil)}
-        (prn-str data)])]))
+       [:div (prn-str data)])]))
 
 (defnc Style [{:keys [children]}]
   [:style {:dangerouslySetInnerHTML #js {:__html (s/join "\n" children)}}])
 
 (defnc App [_]
-  (let [state (<-deref (.-PUNK_DB js/window))
-        ;; dispatch #(f/dispatch (.-PUNK_FRAME js/window) %)
-        ]
+  (let [state (<-deref (.-PUNK_DB js/window))]
     [:div {:style {:display "flex"
                    :height "100%"
                    :flex-direction "column"}}
@@ -113,6 +113,8 @@
       "#next { overflow: scroll }"
       "#next { cursor: pointer; padding: 3px; margin: 3px; }"
       "#next:hover { background-color: #eee; }"
+      "#next.nohover { cursor: initial; }"
+      "#next.nohover:hover { background-color: initial; }"
 
       "#log { overflow: scroll }"
       "#log .item { cursor: pointer; padding: 3px 0; margin: 3px 0; }"
