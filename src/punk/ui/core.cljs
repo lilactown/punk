@@ -165,27 +165,54 @@
 
 (defnc Browser [_]
   (let [state (<-deref (.-PUNK_DB js/window))]
-    [:div {:style {:height "100%"} #_{:position "absolute"
-                   :top 0 :left 0}}
+    [:div {:style {:height "100%"}
+           :id "punk-container"}
      [Style
-      "#current { overflow: auto }"
+      "#punk-container {"
+      "  font-family: sans-serif;"
+      "  background-color: #282a36;"
+      "  margin: 0;"
+      "}"
+      (str "#current { overflow: auto;"
+           "       max-height: 100%;"
+           "}")
+      (str "#current-grid {"
+           "       background-color: #33364e;"
+           "       color: #f8f8f2;"
+           "       box-shadow: 1px 1px 1px 1px #eee;"
+           "}")
       "#current .item { cursor: pointer; padding: 3px; margin: 3px; }"
-      "#current .item:hover { background-color: #eee; }"
+      "#current .item:hover { background-color: #44475a; }"
 
-      "#next { overflow: auto }"
+      (str       "#next { overflow: auto;"
+                 "       max-height: 100%;"
+                "}")
+      (str "#next-grid {"
+           "       background-color: #33364e;"
+           "       color: #f8f8f2;"
+           "       box-shadow: 1px 1px 1px 1px #eee;"
+           "}")
       "#next { cursor: pointer; padding: 3px; margin: 3px; }"
-      "#next:hover { background-color: #eee; }"
+      "#next:hover { background-color: #44475a; }"
       "#next.nohover { cursor: initial; }"
       "#next.nohover:hover { background-color: initial; }"
 
-      "#log { overflow: auto }"
+      (str "#log { overflow: auto;"
+           "       max-height: 100%;"
+
+           "}")
+      (str "#log-grid {"
+           "       background-color: #33364e;"
+           "       color: #f8f8f2;"
+           "       box-shadow: 1px 1px 1px 1px #eee;"
+           "}")
       "#log .item { cursor: pointer; padding: 3px 0; margin: 3px 0; }"
-      "#log .item:hover { background-color: #eee; }"]
+      "#log .item:hover { background-color: #44475a; }"]
      [GridLayout {:class "layout" :layout layout :cols 12
                   :rowHeight 30
                   :width 800}
       ;; Next
-      [:div {:key "next"}
+      [:div {:key "next" :id "next-grid"}
        [:h3 "Next"]
        [:div {:style {:display "flex"
                       :flex-direction "column"}}
@@ -194,7 +221,7 @@
           :id "next"
           :on-next #(dispatch [:punk.ui.browser/view-next])}]]]
       ;; Current
-      [:div {:key "current"}
+      [:div {:key "current" :id "current-grid"}
        [:h3 "Current"]
        [:div {:style {:display "flex"
                       :flex-direction "column"}}
@@ -208,15 +235,20 @@
                   :style {:width "60px"}
                   :disabled (empty? (:history state))
                   :on-click #(dispatch [:punk.ui.browser/back])} "<"]]];; Entrie
-      [:div {:key "entries"}
-       [:h3 "Entries"]
-       [:div {:style {:display "flex"
-                      :flex-direction "column"}
+      [:div {:key "entries"
+             :id "log-grid"}
+       [:div {:style {:overflow "auto"}
               :id "log"}
-        (for [[idx entry] (reverse (map-indexed vector (:entries state)))]
-          [:div {:on-click #(dispatch [:punk.ui.browser/view-entry entry])
-                 :class "item"}
-           idx " " (prn-str (:datafied entry))])]]]]))
+        [:h3 {:style {:position "fixed" :top 0 :left 0 :right 0
+                      ;; :background-color "white"
+                      :margin-top 0
+                      :padding "5px"
+                      :margin-bottom 0}} "Entries"]
+        [:div {:style {:margin-top "60px"}}
+         (for [[idx entry] (reverse (map-indexed vector (:entries state)))]
+           [:div {:on-click #(dispatch [:punk.ui.browser/view-entry entry])
+                  :class "item"}
+            idx " " (prn-str (:datafied entry))])]]]]]))
 
 (defn start! []
   (let [container (or (. js/document getElementById "punk")
