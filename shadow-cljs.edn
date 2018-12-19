@@ -7,5 +7,4 @@
              :compiler-options {:devcards true}
              :devtools {:http-root    "public/workshop"
                         :http-port    8700
-                        :preloads     [devtools.preload]}}}
- }
+                        :preloads     [devtools.preload]}}}}
