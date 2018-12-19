@@ -47,22 +47,22 @@
    (f/dispatch (.-PUNK_FRAME js/window) v)))
 
 (f/reg-event-fx
- ui-frame :punk.ui/view-entry
+ ui-frame :punk.ui.browser/view-entry
  (fn [_ [_ x :as ev]]
    {:punk/dispatch [:punk.browser/view-entry x]}))
 
 (f/reg-event-fx
- ui-frame :punk.ui/nav-to
+ ui-frame :punk.ui.browser/nav-to
  (fn [_ [_ coll k v]]
    {:punk/dispatch [:punk.browser/nav-to coll k v]}))
 
 (f/reg-event-fx
- ui-frame :punk.ui/view-next
+ ui-frame :punk.ui.browser/view-next
  (fn [_ [_ x]]
    {:punk/dispatch [:punk.browser/view-next]}))
 
 (f/reg-event-fx
- ui-frame :punk.ui/back
+ ui-frame :punk.ui.browser/back
  (fn [_ [_ x]]
    {:punk/dispatch [:punk.browser/history-back]}))
 
@@ -127,7 +127,7 @@
                     :flex-direction "column"}}
       [View {:data (-> state :next :datafied)
              :id "next"
-             :on-next #(dispatch [:punk.ui/view-next])}]]
+             :on-next #(dispatch [:punk.ui.browser/view-next])}]]
      ;; Current
      [:h3 "Current"]
      [:div {:style {:flex 1
@@ -136,13 +136,13 @@
                     :flex-direction "column"}}
       [View {:data (-> state :current :datafied)
              :id "current"
-             :on-next #(dispatch [:punk.ui/nav-to %1 %2 %3])}]]
+             :on-next #(dispatch [:punk.ui.browser/nav-to %1 %2 %3])}]]
      ;; Controls
      [:div
       [:button {:type "button"
                 :style {:width "60px"}
                 :disabled (empty? (:history state))
-                :on-click #(dispatch [:punk.ui/back])} "<"]]
+                :on-click #(dispatch [:punk.ui.browser/back])} "<"]]
 
      ;; Log
      [:h3 "Log"]
@@ -152,7 +152,7 @@
                     :flex-direction "column"}
             :id "log"}
       (for [entry (:entries state)]
-        [:div {:on-click #(dispatch [:punk.ui/view-entry entry])
+        [:div {:on-click #(dispatch [:punk.ui.browser/view-entry entry])
                :class "item"}
          (prn-str (:datafied entry))])]]))
 
