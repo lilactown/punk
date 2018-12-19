@@ -172,30 +172,28 @@
      [Style
       "#punk-container {"
       "  font-family: sans-serif;"
-      "  background-color: #282a36;"
       "  margin: 0;"
       "}"
       (str "#current { overflow: auto;"
            "       max-height: 100%;"
+           "       padding: 10px"
            "}")
       (str "#current-grid {"
-           "       background-color: #33364e;"
-           "       color: #f8f8f2;"
-           "       box-shadow: 1px 1px 1px 1px #eee;"
+           "       box-shadow: 2px 2px 1px 1px #eee;"
+           "       border: 1px solid #eee;"
            "}")
       "#current .item { cursor: pointer; padding: 3px; margin: 3px; }"
-      "#current .item:hover { background-color: #44475a; }"
+      "#current .item:hover { background-color: #eaeaea /*#44475a */; }"
 
       (str       "#next { overflow: auto;"
                  "       max-height: 100%;"
                 "}")
       (str "#next-grid {"
-           "       background-color: #33364e;"
-           "       color: #f8f8f2;"
-           "       box-shadow: 1px 1px 1px 1px #eee;"
+           "       border: 1px solid #eee;"
+           "       box-shadow: 2px 2px 1px 1px #eee;"
            "}")
       "#next { cursor: pointer; padding: 3px; margin: 3px; }"
-      "#next:hover { background-color: #44475a; }"
+      "#next:hover { background-color: #eaeaea /* #44475a */; }"
       "#next.nohover { cursor: initial; }"
       "#next.nohover:hover { background-color: initial; }"
 
@@ -204,12 +202,11 @@
 
            "}")
       (str "#log-grid {"
-           "       background-color: #33364e;"
-           "       color: #f8f8f2;"
-           "       box-shadow: 1px 1px 1px 1px #eee;"
+           "       border: 1px solid #eee;"
+           "       box-shadow: 2px 2px 1px 1px #eee;"
            "}")
       "#log .item { cursor: pointer; padding: 3px 0; margin: 3px 0; }"
-      "#log .item:hover { background-color: #44475a; }"]
+      "#log .item:hover { background-color: #eaeaea /*#44475a */; }"]
      [GridLayoutWithWidth
       {:class "layout"
        :layout layout
