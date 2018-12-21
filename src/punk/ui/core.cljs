@@ -3,7 +3,9 @@
             [hx.react.hooks :refer [<-deref]]
             ["react-dom" :as react-dom]
             ["react-grid-layout" :as GridLayout]
+            [goog.object :as gobj]
             [clojure.string :as s]
+            [clojure.core.async :as a]
             [frame.core :as f]))
 
 ;;
@@ -30,42 +32,109 @@
   (with-index [x] x))
 
 ;;
+;; UI state
+;;
+
+(defonce ui-db (atom {:entries []
+                      :history []
+                      :current nil
+                      :loading-next false
+                      :next nil}))
+
+(defonce ui-frame (f/create-frame
+                   (f/inject-cofx :db)))
+
+(defonce dispatch #(f/dispatch ui-frame %))
+
+(f/reg-cofx
+ ui-frame :db
+ (fn db-cofx [cofx]
+   (assoc cofx :db @ui-db)))
+
+(f/reg-fx
+ ui-frame :db
+ (fn db-fx [v]
+   (when (not (identical? @ui-db v))
+     (reset! ui-db v))))
+
+(defn dbg [f]
+  (fn [x]
+    (f x)
+    x))
+
+(def debug-db
+  (frame.interceptors/->interceptor
+   :id :punk/debug-db
+   :before (dbg (fn [x] (js/console.log "db/before> " (-> x :coeffects :db))))
+   :after (dbg (fn [x] (js/console.log "db/after> " (-> x :effects :db))))))
+
+(def debug-event
+  (frame.interceptors/->interceptor
+   :id :punk/debug-event
+   :before (dbg (fn [x] (js/console.log "event> " (-> x :coeffects :event))))))
+
+
+;;
 ;; UI Events
 ;;
 
-(def ui-frame (f/create-frame))
-
-(def dispatch #(f/dispatch ui-frame %))
-
-;; dispatch to the app
-(f/reg-fx
- ui-frame :punk/dispatch
- (fn punk-dispatch-fx [v]
-   (f/dispatch (.-PUNK_FRAME js/window) v)))
-
 (f/reg-event-fx
  ui-frame :punk.ui.browser/view-entry
- (fn [_ [_ x :as ev]]
-   {:punk/dispatch [:punk.browser/view-entry x]}))
-
-(f/reg-event-fx
- ui-frame :punk.ui.browser/nav-to
- (fn [_ [_ coll k v]]
-   {:punk/dispatch [:punk.browser/nav-to coll k v]}))
+ [debug-db debug-event]
+ (fn [{:keys [db]} [_ x]]
+   {:db (assoc db
+               :current x
+               :next nil
+               :loading-next false
+               :history [])}))
 
 (f/reg-event-fx
  ui-frame :punk.ui.browser/view-next
- (fn [_ [_ x]]
-   {:punk/dispatch [:punk.browser/view-next]}))
+ [#_debug-db debug-event]
+ (fn [{:keys [db]} _]
+   {:db (-> db
+            (assoc
+             :current (:next db)
+             :next nil)
+            (update
+             :history
+             conj (:current db)))}))
 
 (f/reg-event-fx
- ui-frame :punk.ui.browser/back
- (fn [_ [_ x]]
-   {:punk/dispatch [:punk.browser/history-back]}))
+ ui-frame :punk.ui.browser/history-back
+ [#_debug-db debug-event]
+ (fn [{:keys [db]} _]
+   {:db (-> db
+            (update :history pop)
+            (assoc :current (-> db :history peek)
+                   :next nil))}))
+
+(f/reg-event-fx
+ ui-frame :punk.ui.browser/nav-to
+ [#_debug-db debug-event]
+ (fn [{:keys [db]} [_ idx k v]]
+   {:db (assoc db :loading-next true)
+    :emit [:nav idx k v]}))
+
 
 ;;
-;; Data views
+;; Punk events
 ;;
+
+(f/reg-event-fx
+ ui-frame :entry
+ [#_debug-db debug-event]
+ (fn [cofx [_ idx x]]
+   {:db (update (:db cofx) :entries conj (assoc x :idx idx))}))
+
+(f/reg-event-fx
+ ui-frame :nav
+ [debug-event debug-db]
+ (fn [{:keys [db]} [_ idx x]]
+   {:db (assoc db
+               :loading-next false
+               :next x)}))
+
 
 (defnc MapView [{:keys [data on-next] :as props}]
   (when (not (nil? data))
@@ -148,7 +217,7 @@
     :match any?
     :view EdnView}])
 
-(defn match-view [views data]
+(defn match-first-view [views data]
   (:view (first (filter #((:match %) data) views))))
 
 ;;
@@ -166,7 +235,7 @@
 (def GridLayoutWithWidth (GridLayout/WidthProvider GridLayout))
 
 (defnc Browser [_]
-  (let [state (<-deref (.-PUNK_DB js/window))]
+  (let [state (<-deref ui-db)]
     [:div {:style {:height "100%"}
            :id "punk-container"}
      [Style
@@ -197,16 +266,16 @@
       "#next.nohover { cursor: initial; }"
       "#next.nohover:hover { background-color: initial; }"
 
-      (str "#log { overflow: auto;"
+      (str "#entries { overflow: auto;"
            "       max-height: 100%;"
 
            "}")
-      (str "#log-grid {"
+      (str "#entries-grid {"
            "       border: 1px solid #eee;"
            "       box-shadow: 2px 2px 1px 1px #eee;"
            "}")
-      "#log .item { cursor: pointer; padding: 3px 0; margin: 3px 0; }"
-      "#log .item:hover { background-color: #eaeaea /*#44475a */; }"]
+      "#entries .item { cursor: pointer; padding: 3px 0; margin: 3px 0; }"
+      "#entries .item:hover { background-color: #eaeaea /*#44475a */; }"]
      [GridLayoutWithWidth
       {:class "layout"
        :layout layout
@@ -217,8 +286,8 @@
        [:h3 "Next"]
        [:div {:style {:display "flex"
                       :flex-direction "column"}}
-        [(match-view views (-> state :next :datafied))
-         {:data (-> state :next :datafied)
+        [(match-first-view views (-> state :next :value))
+         {:data (-> state :next :value)
           :id "next"
           :on-next #(dispatch [:punk.ui.browser/view-next])}]]]
       ;; Current
@@ -226,20 +295,21 @@
        [:h3 "Current"]
        [:div {:style {:display "flex"
                       :flex-direction "column"}}
-        [(match-view views (-> state :current :datafied))
-         {:data (-> state :current :datafied)
+        [(match-first-view views (-> state :current :value))
+         {:data (-> state :current :value)
           :id "current"
-          :on-next #(dispatch [:punk.ui.browser/nav-to %1 %2 %3])}]]
+          :on-next #(dispatch [:punk.ui.browser/nav-to
+                               (-> state :current :idx) %2 %3])}]]
        ;; Controls
        [:div
         [:button {:type "button"
                   :style {:width "60px"}
                   :disabled (empty? (:history state))
-                  :on-click #(dispatch [:punk.ui.browser/back])} "<"]]];; Entrie
+                  :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]]];; Entrie
       [:div {:key "entries"
-             :id "log-grid"}
+             :id "entries-grid"}
        [:div {:style {:overflow "auto"}
-              :id "log"}
+              :id "entries"}
         [:h3 {:style {:position "fixed" :top 0 :left 0 :right 0
                       ;; :background-color "white"
                       :margin-top 0
@@ -249,7 +319,7 @@
          (for [[idx entry] (reverse (map-indexed vector (:entries state)))]
            [:div {:on-click #(dispatch [:punk.ui.browser/view-entry entry])
                   :class "item"}
-            idx " " (prn-str (:datafied entry))])]]]]]))
+            idx " " (prn-str (:value entry))])]]]]]))
 
 (defn start! []
   (let [container (or (. js/document getElementById "punk")
@@ -257,4 +327,13 @@
                         (. new-container setAttribute "id" "punk")
                         (-> js/document .-body (.appendChild new-container))
                         new-container))]
+    (a/go-loop []
+      (let [ev (a/<! (gobj/get js/window "PUNK_IN_STREAM"))]
+        (println ev)
+        (dispatch ev)
+        (recur)))
+    (f/reg-fx
+     ui-frame :emit
+     (fn [v]
+       (a/put! (gobj/get js/window "PUNK_OUT_STREAM") v)))
     (react-dom/render (hx/f [Browser]) container)))

@@ -31,32 +31,25 @@
     :else x))
 
 ;;
-;; App state
+;; State
 ;;
 
-(defonce punk-db (atom {:entries [{:value {:foo "bar"}
-                               :datafied {:foo "bar"}}]
-                    :history []
-                    :current nil
-                    :next nil}))
+(defonce db (atom {:entries []}))
 
-(defonce punk-frame (f/create-frame
-                    (f/inject-cofx :db)))
+(defonce frame (f/create-frame (f/inject-cofx :db)))
 
-(set! (.-PUNK_DB js/window) punk-db)
-
-(set! (.-PUNK_FRAME js/window) punk-frame)
+(defonce dispatch #(f/dispatch frame %))
 
 (f/reg-cofx
- punk-frame :db
+ frame :db
  (fn db-cofx [cofx]
-   (assoc cofx :db @punk-db)))
+   (assoc cofx :db @db)))
 
 (f/reg-fx
- punk-frame :db
+ frame :db
  (fn db-fx [v]
-   (when (not (identical? @punk-db v))
-     (reset! punk-db v))))
+   (when (not (identical? @db v))
+     (reset! db v))))
 
 (defn dbg [f]
   (fn [x]
@@ -74,63 +67,52 @@
    :id :punk/debug-event
    :before (dbg (fn [x] (js/console.log "event> " (-> x :coeffects :event))))))
 
-;;
-;; Punk events
-;;
+(def debug-fx
+  (frame.interceptors/->interceptor
+   :id :punk/debug-event
+   :after (dbg (fn [x] (js/console.log "effects> " (-> x :effects))))))
 
 (f/reg-event-fx
- punk-frame :punk.browser/add-entry
- [#_debug-db debug-event]
- (fn [cofx [_ x]]
-   {:db (update (:db cofx) :entries conj {:value x
-                                          :datafied (d/datafy x)})}))
-
-(f/reg-event-fx
- punk-frame :punk.browser/view-entry
- [#_debug-db debug-event]
+ frame :tap
+ [debug-event debug-fx]
  (fn [{:keys [db]} [_ x]]
-   {:db (assoc db
-               :current x
-               :next nil
-               :history [])}))
+   (let [db' (update db :entries conj x)
+         idx (count (:entries db))
+         dx (d/datafy x)]
+     {:db db'
+      :emit [:entry idx {:value dx
+                         :meta (meta dx)}]})))
 
 (f/reg-event-fx
- punk-frame :punk.browser/nav-to
- [#_debug-db debug-event]
- (fn [{:keys [db]} [_ coll k v]]
-   (let [nv (d/nav coll k v)]
-     {:db (-> db
-              (assoc :next {:value nv
-                            :datafied (d/datafy nv)}))})))
+ frame :list
+ [debug-event debug-fx]
+ (fn [{:keys [db]} [_ x]]
+   {:emit [:entries (-> (:entries db)
+                        (mapv d/datafy)
+                        (mapv (fn [dx] {:value dx
+                                        :meta (meta dx)})))]}))
 
 (f/reg-event-fx
- punk-frame :punk.browser/view-next
- [#_debug-db debug-event]
- (fn [{:keys [db]} _]
-   {:db (-> db
-            (assoc
-             :current (:next db)
-             :next nil)
-            (update
-             :history
-             conj (:current db)))}))
-
-(f/reg-event-fx
- punk-frame :punk.browser/history-back
- [#_debug-db debug-event]
- (fn [{:keys [db]} _]
-   {:db (-> db
-            (update :history pop)
-            (assoc :current (-> db :history peek)
-                   :next nil))}))
-
-#_(f/dispatch punk-frame [:punk.browser/add-entry "foo"])
+ frame :nav
+ [debug-event debug-fx]
+ (fn [{:keys [db]} [_ idx k v]]
+   (let [x (get-in db [:entries idx])
+         ;; nav to next item in datafied object
+         x' (d/nav (d/datafy x) k v)
+         ;; store this nav'd value in db for reference later
+         db' (update db :entries conj x')
+         idx' (count (:entries db))
+         dx' (d/datafy x')]
+     {:db db'
+      :emit [:nav idx {:value dx'
+                       :meta (meta dx')
+                       :idx idx'}]})))
 
 ;;
 ;; External events and subscriptions
 ;;
 
-(defn tap-fn [x] (f/dispatch punk-frame [:punk.browser/add-entry (dataficate x)]))
+(defonce tap-fn (fn tap-fn [x] (dispatch [:tap (dataficate x)])))
 
 (defn remove-taps! []
   (remove-tap tap-fn))
