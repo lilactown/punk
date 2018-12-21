@@ -18,3 +18,5 @@
 #_(tap> #js {:asdf #js ["one" "two"]})
 
 #_(tap> 1)
+
+#_(tap> (js/Error. "foo"))

@@ -6,12 +6,13 @@
 
 (defnc View [{:keys [data on-click]}]
   (let [state (<-state {:data-frisk nil})]
-    [frisk/Root {:data [data]
+    [frisk/Root {:data data
                  :state-atom state
                  :id "punk-ui"}]))
 
-(defonce register
-  (punk-ui/register-view!
-   {:id :punk.view/frisk
-    :match any?
-    :view View}))
+(punk-ui/unregister-view! :punk.view/frisk)
+
+(punk-ui/register-view!
+ {:id :punk.view/frisk
+  :match any?
+  :view View})

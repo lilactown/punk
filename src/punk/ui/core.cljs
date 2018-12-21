@@ -54,7 +54,9 @@
                                :view views/SetView}
 
                               {:id :punk.view/coll
-                               :match coll?
+                               :match (every-pred
+                                       coll?
+                                       (comp not map?))
                                :view views/CollView}
 
                               {:id :punk.view/edn
@@ -128,7 +130,8 @@
    {:db (-> db
             (update :history pop)
             (assoc :current (-> db :history peek)
-                   :next nil))}))
+                   :next nil
+                   :view/selected nil))}))
 
 (f/reg-event-fx
  ui-frame :punk.ui.browser/nav-to
@@ -149,9 +152,21 @@
  (fn [{:keys [db]} [_ v]]
    {:db (update db :views conj v)}))
 
+(f/reg-event-fx
+ ui-frame :punk.ui.browser/unregister-view
+ []
+ (fn [{:keys [db]} [_ id]]
+   ;; filterv here is important to preserve order
+   (let [views' (filterv #(not= id (:id %)) (:views db))]
+     {:db (assoc db :views views')})))
+
 (defn register-view!
   [{:keys [id match view] :as v}]
   (dispatch [:punk.ui.browser/register-view v]))
+
+(defn unregister-view!
+  [id]
+  (dispatch [:punk.ui.browser/unregister-view id]))
 
 (defn match-views [views data]
   (filter #((:match %) data) views))
@@ -173,7 +188,8 @@
  (fn [{:keys [db]} [_ idx x]]
    {:db (assoc db
                :next/loading false
-               :next x)}))
+               :next x
+               :view/selected nil)}))
 
 
 ;;
@@ -250,7 +266,11 @@
       ;; Next
       [:div {:key "next" :id "next-grid"}
        [:h3 "Next"]
-       [:span (str (:id next-view))]
+       [:select {:value (str (:id next-view))
+                 :on-change #(dispatch [:punk.ui.browser/select-view-type
+                                        (keyword (subs (.. % -target -value) 1))])}
+        (for [nv next-views]
+          [:option (str (:id nv))])]
        [:div {:style {:display "flex"
                       :flex-direction "column"}}
         [(:view next-view)
