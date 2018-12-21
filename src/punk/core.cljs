@@ -108,9 +108,11 @@
                        :meta (meta dx')
                        :idx idx'}]})))
 
-;;
-;; External events and subscriptions
-;;
+(f/reg-event-fx
+ frame :clear
+ [debug-event debug-fx]
+ (fn [{:keys [db]} _]
+   {:db (assoc db :entries [])}))
 
 (defonce tap-fn (fn tap-fn [x] (dispatch [:tap (dataficate x)])))
 

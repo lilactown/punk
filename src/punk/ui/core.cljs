@@ -6,7 +6,8 @@
             [goog.object :as gobj]
             [clojure.string :as s]
             [clojure.core.async :as a]
-            [frame.core :as f]))
+            [frame.core :as f]
+            [punk.ui.views :as views]))
 
 ;;
 ;; Data structures
@@ -38,8 +39,28 @@
 (defonce ui-db (atom {:entries []
                       :history []
                       :current nil
-                      :loading-next false
-                      :next nil}))
+                      :next/loading false
+                      :next nil
+                      :views [{:id :punk.view/nil
+                               :match nil?
+                               :view nil}
+
+                              {:id :punk.view/map
+                               :match map?
+                               :view views/MapView}
+
+                              {:id :punk.view/set
+                               :match set?
+                               :view views/SetView}
+
+                              {:id :punk.view/coll
+                               :match coll?
+                               :view views/CollView}
+
+                              {:id :punk.view/edn
+                               :match any?
+                               :view views/EdnView}]
+                      :view/selected nil}))
 
 (defonce ui-frame (f/create-frame
                    (f/inject-cofx :db)))
@@ -85,7 +106,7 @@
    {:db (assoc db
                :current x
                :next nil
-               :loading-next false
+               :next/loading false
                :history [])}))
 
 (f/reg-event-fx
@@ -113,8 +134,17 @@
  ui-frame :punk.ui.browser/nav-to
  [#_debug-db debug-event]
  (fn [{:keys [db]} [_ idx k v]]
-   {:db (assoc db :loading-next true)
+   {:db (assoc db :next/loading true)
     :emit [:nav idx k v]}))
+
+(f/reg-event-fx
+ ui-frame :punk.ui.browser/register-view
+ (fn [{:keys [db]} [_ v]]
+   {:db (update db :views conj v)}))
+
+(defn register-view!
+  [{:keys [id match view] :as view}]
+  (dispatch [:punk.ui.browser/register-view]))
 
 
 ;;
@@ -132,93 +162,12 @@
  [debug-event debug-db]
  (fn [{:keys [db]} [_ idx x]]
    {:db (assoc db
-               :loading-next false
+               :next/loading false
                :next x)}))
 
+(defn match-views [views data]
+  (filter #((:match %) data) views))
 
-(defnc MapView [{:keys [data on-next] :as props}]
-  (when (not (nil? data))
-    [:div (dissoc props :on-next :data)
-     [:<>
-      [:div {:style {:display "flex"
-                     :border-bottom "1px solid #999"
-                     :padding-bottom "3px"
-                     :margin-bottom "3px"}}
-       [:div {:style {:flex 1}} "key"]
-       [:div {:style {:flex 2}} "value"]]
-      (for [[key v] data]
-        [:div {:style {:display "flex"}
-               :key key
-               :class "item"
-               :on-click #(on-next data key v)}
-         [:div {:style {:flex 1}}
-          (prn-str key)]
-         [:div {:style {:flex 2}}
-          (prn-str v)]])]]))
-
-(defnc CollView [{:keys [data on-next] :as props}]
-  (when (not (nil? data))
-    [:div (dissoc props :on-next :data)
-     [:<>
-      [:div {:style {:display "flex"
-                     :border-bottom "1px solid #999"
-                     :padding-bottom "3px"
-                     :margin-bottom "3px"}}
-       [:div {:style {:flex 1}} "idx"]
-       [:div {:style {:flex 2}} "value"]]
-      (for [[key v] (map-indexed vector data)]
-        [:div {:style {:display "flex"}
-               :key key
-               :class "item"
-               :on-click #(on-next data key v)}
-         [:div {:style {:flex 1}}
-          (prn-str key)]
-         [:div {:style {:flex 2}}
-          (prn-str v)]])]]))
-
-(defnc SetView [{:keys [data on-next] :as props}]
-  (when (not (nil? data))
-    [:div (dissoc props :on-next :data)
-     [:<>
-      [:div {:style {:display "flex"
-                     :border-bottom "1px solid #999"
-                     :padding-bottom "3px"
-                     :margin-bottom "3px"}}
-       [:div {:style {:flex 2}} "value"]]
-      (for [v (sort data)]
-        [:div {:style {:display "flex"}
-               :key v
-               :class "item"
-               :on-click #(on-next data key v)}
-         [:div {:style {:flex 2}}
-          (prn-str v)]])]]))
-
-(defnc EdnView [{:keys [data on-next] :as props}]
-  [:div (prn-str data)])
-
-(def views
-  [{:id :punk.view/nil
-    :match nil?
-    :view nil}
-
-   {:id :punk.view/map
-    :match map?
-    :view MapView}
-
-   {:id :punk.view/set
-    :match set?
-    :view SetView}
-
-   {:id :punk.view/coll
-    :match coll?
-    :view CollView}
-
-   {:id :punk.view/edn
-    :match any?
-    :view EdnView}])
-
-(defn match-first-view [views data]
-  (:view (first (filter #((:match %) data) views))))
 
 ;;
 ;; Browser panes
@@ -235,7 +184,13 @@
 (def GridLayoutWithWidth (GridLayout/WidthProvider GridLayout))
 
 (defnc Browser [_]
-  (let [state (<-deref ui-db)]
+  (let [state (<-deref ui-db)
+        next-view (-> (:views state)
+                      (match-views (-> state :next :value))
+                      (first))
+        current-view (-> (:views state)
+                         (match-views (-> state :current :value))
+                         (first))]
     [:div {:style {:height "100%"}
            :id "punk-container"}
      [Style
@@ -284,9 +239,10 @@
       ;; Next
       [:div {:key "next" :id "next-grid"}
        [:h3 "Next"]
+       [:span (str (:id next-view))]
        [:div {:style {:display "flex"
                       :flex-direction "column"}}
-        [(match-first-view views (-> state :next :value))
+        [(:view next-view)
          {:data (-> state :next :value)
           :id "next"
           :on-next #(dispatch [:punk.ui.browser/view-next])}]]]
@@ -295,7 +251,7 @@
        [:h3 "Current"]
        [:div {:style {:display "flex"
                       :flex-direction "column"}}
-        [(match-first-view views (-> state :current :value))
+        [(:view current-view)
          {:data (-> state :current :value)
           :id "current"
           :on-next #(dispatch [:punk.ui.browser/nav-to
@@ -321,12 +277,7 @@
                   :class "item"}
             idx " " (prn-str (:value entry))])]]]]]))
 
-(defn start! []
-  (let [container (or (. js/document getElementById "punk")
-                      (let [new-container (. js/document createElement "div")]
-                        (. new-container setAttribute "id" "punk")
-                        (-> js/document .-body (.appendChild new-container))
-                        new-container))]
+(defn ^:export start! [node]
     (a/go-loop []
       (let [ev (a/<! (gobj/get js/window "PUNK_IN_STREAM"))]
         (println ev)
@@ -336,4 +287,4 @@
      ui-frame :emit
      (fn [v]
        (a/put! (gobj/get js/window "PUNK_OUT_STREAM") v)))
-    (react-dom/render (hx/f [Browser]) container)))
+    (react-dom/render (hx/f [Browser]) node))

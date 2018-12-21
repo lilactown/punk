@@ -22,3 +22,5 @@
 (gobj/set js/window "PUNK_IN_STREAM" in-stream)
 
 (gobj/set js/window "PUNK_OUT_STREAM" out-stream)
+
+(punk/add-taps!)
