@@ -1,6 +1,7 @@
 (ns punk.workshop
   (:require [punk.adapter.web]
-            [punk.ui.core :as punk-ui]))
+            [punk.ui.core :as punk-ui]
+            [punk.ui.views.frisk]))
 
 (defn start []
   (let [container (or (. js/document getElementById "punk")

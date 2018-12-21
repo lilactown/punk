@@ -138,13 +138,23 @@
     :emit [:nav idx k v]}))
 
 (f/reg-event-fx
+ ui-frame :punk.ui.browser/select-view-type
+ []
+ (fn [{:keys [db]} [_ id]]
+   {:db (assoc db :view/selected id)}))
+
+(f/reg-event-fx
  ui-frame :punk.ui.browser/register-view
+ [debug-db]
  (fn [{:keys [db]} [_ v]]
    {:db (update db :views conj v)}))
 
 (defn register-view!
-  [{:keys [id match view] :as view}]
-  (dispatch [:punk.ui.browser/register-view]))
+  [{:keys [id match view] :as v}]
+  (dispatch [:punk.ui.browser/register-view v]))
+
+(defn match-views [views data]
+  (filter #((:match %) data) views))
 
 
 ;;
@@ -165,9 +175,6 @@
                :next/loading false
                :next x)}))
 
-(defn match-views [views data]
-  (filter #((:match %) data) views))
-
 
 ;;
 ;; Browser panes
@@ -185,12 +192,16 @@
 
 (defnc Browser [_]
   (let [state (<-deref ui-db)
-        next-view (-> (:views state)
-                      (match-views (-> state :next :value))
-                      (first))
+        next-views (-> (:views state)
+                       (match-views (-> state :next :value)))
+
+        next-view (if (:view/selected state)
+                    (first (filter #(= (:id %) (:view/selected state)) next-views))
+                    (first next-views))
         current-view (-> (:views state)
                          (match-views (-> state :current :value))
                          (first))]
+    (js/console.log next-views)
     [:div {:style {:height "100%"}
            :id "punk-container"}
      [Style
@@ -288,3 +299,5 @@
      (fn [v]
        (a/put! (gobj/get js/window "PUNK_OUT_STREAM") v)))
     (react-dom/render (hx/f [Browser]) node))
+
+#_(dispatch [:punk.ui.browser/select-view-type :punk.view/frisk])

@@ -19,14 +19,14 @@
 
 (defn dataficate [x]
   (cond
-    (object? x)
-    (do (specify! x
-          p/Datafiable
-          (datafy [o] (dissoc (js->clj o)
-                              ;; lol gross
-                              "clojure$core$protocols$Datafiable$"
-                              "clojure$core$protocols$Datafiable$datafy$arity$1")))
-        x)
+    ;; (object? x)
+    ;; (do (specify! x
+    ;;       p/Datafiable
+    ;;       (datafy [o] (dissoc (js->clj o)
+    ;;                           ;; lol gross
+    ;;                           "clojure$core$protocols$Datafiable$"
+    ;;                           "clojure$core$protocols$Datafiable$datafy$arity$1")))
+    ;;     x)
 
     :else x))
 
