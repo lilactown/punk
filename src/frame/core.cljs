@@ -11,7 +11,7 @@
 ;; Handling handlers
 ;;
 
-(def handler-kinds #{:event :fx :cofx :sub})
+(def handler-kinds #{:event :fx :cofx})
 
 (defn- get-handler
 
