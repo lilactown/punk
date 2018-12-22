@@ -59,5 +59,5 @@
           (prn-str v)]])]]))
 
 (defnc EdnView [{:keys [data on-next] :as props}]
-  [:div (prn-str data)])
+  [:div [:code (prn-str data)]])
 

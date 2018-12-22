@@ -4,15 +4,16 @@
             [hx.react.hooks :refer [<-state]]
             [punk.ui.core :as punk-ui]))
 
-(defnc View [{:keys [data on-click]}]
+(defnc View [{:keys [data on-next]}]
   (let [state (<-state {:data-frisk nil})]
-    [frisk/Root {:data data
-                 :state-atom state
-                 :id "punk-ui"}]))
+    [:div {:style {:overflow "auto"}}
+     [frisk/Root {:data data
+                  :state-atom state
+                  :id "punk-ui"}]]))
 
 (punk-ui/unregister-view! :punk.view/frisk)
 
 (punk-ui/register-view!
- {:id :punk.view/frisk
-  :match any?
-  :view View})
+ :id :punk.view/frisk
+ :match any?
+ :view View)

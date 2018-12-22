@@ -161,7 +161,7 @@
      {:db (assoc db :views views')})))
 
 (defn register-view!
-  [{:keys [id match view] :as v}]
+  [& {:keys [id match view] :as v}]
   (dispatch [:punk.ui.browser/register-view v]))
 
 (defn unregister-view!
@@ -269,8 +269,8 @@
        [:select {:value (str (:id next-view))
                  :on-change #(dispatch [:punk.ui.browser/select-view-type
                                         (keyword (subs (.. % -target -value) 1))])}
-        (for [nv next-views]
-          [:option (str (:id nv))])]
+        (for [vid (map (comp str :id) next-views)]
+          [:option {:key vid} vid])]
        [:div {:style {:display "flex"
                       :flex-direction "column"}}
         [(:view next-view)
