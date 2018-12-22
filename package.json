@@ -9,7 +9,8 @@
   "author": "",
   "license": "UNLICENSED",
   "devDependencies": {
-    "shadow-cljs": "^2.7.9"
+    "shadow-cljs": "^2.7.9",
+    "showdown": "^1.9.0"
   },
   "dependencies": {
     "react": "^16.7.0-alpha.2",

@@ -206,6 +206,11 @@
 
 (def GridLayoutWithWidth (GridLayout/WidthProvider GridLayout))
 
+(defnc Pane [{:keys [title id children]}]
+  [:div {:id id}
+   [:h3 title]
+   children])
+
 (defnc Browser [_]
   (let [state (<-deref ui-db)
         next-views (-> (:views state)
@@ -264,19 +269,19 @@
        :cols 12
        :rowHeight 30}
       ;; Next
-      [:div {:key "next" :id "next-grid"}
-       [:h3 "Next"]
-       [:select {:value (str (:id next-view))
-                 :on-change #(dispatch [:punk.ui.browser/select-view-type
-                                        (keyword (subs (.. % -target -value) 1))])}
-        (for [vid (map (comp str :id) next-views)]
-          [:option {:key vid} vid])]
-       [:div {:style {:display "flex"
-                      :flex-direction "column"}}
-        [(:view next-view)
-         {:data (-> state :next :value)
-          :id "next"
-          :on-next #(dispatch [:punk.ui.browser/view-next])}]]]
+      [:div {:key "next"}
+       [Pane {:id "next-grid" :title "Next"}
+        [:select {:value (str (:id next-view))
+                  :on-change #(dispatch [:punk.ui.browser/select-view-type
+                                         (keyword (subs (.. % -target -value) 1))])}
+         (for [vid (map (comp str :id) next-views)]
+           [:option {:key vid} vid])]
+        [:div {:style {:display "flex"
+                       :flex-direction "column"}}
+         [(:view next-view)
+          {:data (-> state :next :value)
+           :id "next"
+           :on-next #(dispatch [:punk.ui.browser/view-next])}]]]]
       ;; Current
       [:div {:key "current" :id "current-grid"}
        [:h3 "Current"]

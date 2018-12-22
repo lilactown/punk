@@ -3,7 +3,11 @@
  {:workshop {:target :browser
              :output-dir "public/workshop/js"
              :asset-path "/js"
-             :modules {:main {:entries [punk.workshop]}}
+             :modules {:main {:entries [punk.ui.core]}
+                       :workshop {:entries [punk.workshop]
+                                  :depends-on #{:main}}
+                       :cards {:entries [punk.workshop.devcards]
+                               :depends-on #{:main}}}
              :compiler-options {:devcards true}
              :devtools {:http-root    "public/workshop"
                         :http-port    8700
