@@ -96,7 +96,6 @@
    :id :punk/debug-event
    :before (dbg (fn [x] (js/console.log "event> " (-> x :coeffects :event))))))
 
-
 ;;
 ;; UI Events
 ;;
@@ -171,7 +170,6 @@
 (defn match-views [views data]
   (filter #((:match %) data) views))
 
-
 ;;
 ;; Punk events
 ;;
@@ -191,7 +189,6 @@
                :next x
                :view/selected nil)}))
 
-
 ;;
 ;; Browser panes
 ;;
@@ -206,10 +203,30 @@
 
 (def GridLayoutWithWidth (GridLayout/WidthProvider GridLayout))
 
-(defnc Pane [{:keys [title id children]}]
-  [:div {:id id}
-   [:h3 title]
-   children])
+(defnc Pane [{:keys [title id controls children]}]
+  [:div {:id id
+         :style {:border "1px solid #ddd"
+                 :box-shadow "2px 2px 1px 1px #eee"
+                 :height "100%"
+                 :background "white"
+                 :position "relative"
+                 :display "flex"
+                 :flex-direction "column"}}
+   [:div {:style {:overflow "auto"
+                  :flex 1}}
+    [:div {:style {:background "#eee"
+                   :padding "8px"
+                   :position "sticky"
+                   :top 0}}
+     [:span {:style {:font-size "1.17em"
+                     :font-weight "500"}}
+      title]]
+    [:div {:style {:padding "8px"}}
+     children]]
+   (when controls
+     [:div {:style {:padding "3px 8px"
+                    :background "#eee"}}
+      controls])])
 
 (defnc Browser [_]
   (let [state (<-deref ui-db)
@@ -232,7 +249,6 @@
       "}"
       (str "#current { overflow: auto;"
            "       max-height: 100%;"
-           "       padding: 10px"
            "}")
       (str "#current-grid {"
            "       box-shadow: 2px 2px 1px 1px #eee;"
@@ -243,7 +259,7 @@
 
       (str       "#next { overflow: auto;"
                  "       max-height: 100%;"
-                "}")
+                 "}")
       (str "#next-grid {"
            "       border: 1px solid #eee;"
            "       box-shadow: 2px 2px 1px 1px #eee;"
@@ -270,7 +286,7 @@
        :rowHeight 30}
       ;; Next
       [:div {:key "next"}
-       [Pane {:id "next-grid" :title "Next"}
+       [Pane {:title "Next"}
         [:select {:value (str (:id next-view))
                   :on-change #(dispatch [:punk.ui.browser/select-view-type
                                          (keyword (subs (.. % -target -value) 1))])}
@@ -283,46 +299,38 @@
            :id "next"
            :on-next #(dispatch [:punk.ui.browser/view-next])}]]]]
       ;; Current
-      [:div {:key "current" :id "current-grid"}
-       [:h3 "Current"]
-       [:div {:style {:display "flex"
-                      :flex-direction "column"}}
-        [(:view current-view)
-         {:data (-> state :current :value)
-          :id "current"
-          :on-next #(dispatch [:punk.ui.browser/nav-to
-                               (-> state :current :idx) %2 %3])}]]
-       ;; Controls
-       [:div
-        [:button {:type "button"
-                  :style {:width "60px"}
-                  :disabled (empty? (:history state))
-                  :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]]];; Entrie
-      [:div {:key "entries"
-             :id "entries-grid"}
-       [:div {:style {:overflow "auto"}
-              :id "entries"}
-        [:h3 {:style {:position "fixed" :top 0 :left 0 :right 0
-                      ;; :background-color "white"
-                      :margin-top 0
-                      :padding "5px"
-                      :margin-bottom 0}} "Entries"]
-        [:div {:style {:margin-top "60px"}}
-         (for [[idx entry] (reverse (map-indexed vector (:entries state)))]
-           [:div {:on-click #(dispatch [:punk.ui.browser/view-entry entry])
-                  :class "item"}
-            idx " " (prn-str (:value entry))])]]]]]))
+      [:div {:key "current"}
+       [Pane {:title "Current"
+              :controls [:div
+                         [:button {:type "button"
+                                   :style {:width "60px"}
+                                   :disabled (empty? (:history state))
+                                   :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]]}
+        [:div {:style {:display "flex"
+                       :flex-direction "column"}}
+         [(:view current-view)
+          {:data (-> state :current :value)
+           :id "current"
+           :on-next #(dispatch [:punk.ui.browser/nav-to
+                                (-> state :current :idx) %2 %3])}]]]]
+      ;; Entries
+      [:div {:key "entries"}
+       [Pane {:title "Entries" :id "entries"}
+        (for [[idx entry] (reverse (map-indexed vector (:entries state)))]
+          [:div {:on-click #(dispatch [:punk.ui.browser/view-entry entry])
+                 :class "item"}
+           idx " " (prn-str (:value entry))])]]]]))
 
 (defn ^:export start! [node]
-    (a/go-loop []
-      (let [ev (a/<! (gobj/get js/window "PUNK_IN_STREAM"))]
-        (println ev)
-        (dispatch ev)
-        (recur)))
-    (f/reg-fx
-     ui-frame :emit
-     (fn [v]
-       (a/put! (gobj/get js/window "PUNK_OUT_STREAM") v)))
-    (react-dom/render (hx/f [Browser]) node))
+  (a/go-loop []
+    (let [ev (a/<! (gobj/get js/window "PUNK_IN_STREAM"))]
+      (println ev)
+      (dispatch ev)
+      (recur)))
+  (f/reg-fx
+   ui-frame :emit
+   (fn [v]
+     (a/put! (gobj/get js/window "PUNK_OUT_STREAM") v)))
+  (react-dom/render (hx/f [Browser]) node))
 
 #_(dispatch [:punk.ui.browser/select-view-type :punk.view/frisk])
