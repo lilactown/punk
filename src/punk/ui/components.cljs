@@ -32,3 +32,23 @@
      [:div {:style {:padding "3px 8px"
                     :background "#eee"}}
       controls])])
+
+(defnc Table [{:keys [cols data
+                      on-entry-click] :as props}]
+  (let [key-fn (-> cols first second)]
+    [:div (dissoc props :data :cols :on-next :on-entry-click)
+     [:div {:style {:display "flex"
+                    :border-bottom "1px solid #999"
+                    :padding-bottom "3px"
+                    :margin-bottom "3px"}}
+      (for [[col-name _ style] cols]
+        [:div {:style style} (name col-name)])]
+     (for [d data]
+       [:div {:style {:display "flex"
+                      :padding "3px 5px"
+                      :margin "3px 0"}
+              :key (key-fn d)
+              :class "item"
+              :on-click #(on-entry-click (key-fn d))}
+        (for [[_ parse style] cols]
+          [:div {:style style} (parse d)])])]))

@@ -26,3 +26,20 @@
                         :controls [Controls]}
           (for [n (range 20)]
             [:div "Child " n])]]))
+
+(dc/defcard table-coll
+  (hx/f [punk-ui/Table {:cols [[:idx first {:flex 1}]
+                               [:value second {:flex 3}]]
+                        :data (map-indexed vector [1 2 3 4])}]))
+
+(dc/defcard table-map
+  (hx/f [punk-ui/Table {:cols [[:key (comp str first) {:flex 1}]
+                               [:value (comp prn-str second) {:flex 3}]]
+                        :data {:foo "bar" :baz #{1 2 3}}}]))
+
+(dc/defcard table-multiple-things
+  (hx/f [punk-ui/Table {:cols [[:key (comp str first) {:flex 1}]
+                               [:value (comp prn-str second) {:flex 3}]
+                               [:meta (comp prn-str meta second) {:flex 3}]]
+                        :data {:foo (with-meta {:asdf "jkl"} {:punk/tag 'cljs.core/Map})
+                               :baz (with-meta #{1 2 3} {:punk/tag 'cljs.core/Set})}}]))

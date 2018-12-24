@@ -222,14 +222,11 @@
       "  font-family: sans-serif;"
       "  margin: 0;"
       "}"
-      (str "#current { overflow: auto;"
-           "       max-height: 100%;"
-           "}")
-      (str "#current-grid {"
+     (str "#current-grid {"
            "       box-shadow: 2px 2px 1px 1px #eee;"
            "       border: 1px solid #eee;"
            "}")
-      "#current .item { cursor: pointer; padding: 3px; margin: 3px; }"
+      "#current .item { cursor: pointer;}"
       "#current .item:hover { background-color: #eaeaea /*#44475a */; }"
 
       (str       "#next { overflow: auto;"
@@ -277,16 +274,16 @@
       ;; Current
       [:div {:key "current"}
        [pc/Pane {:title "Current"
-              :controls [:div
-                         [:button {:type "button"
-                                   :style {:width "60px"}
-                                   :disabled (empty? (:history state))
-                                   :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]]}
+                 :id "current"
+                 :controls [:div
+                            [:button {:type "button"
+                                      :style {:width "60px"}
+                                      :disabled (empty? (:history state))
+                                      :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]]}
         [:div {:style {:display "flex"
                        :flex-direction "column"}}
          [(:view current-view)
           {:data (-> state :current :value)
-           :id "current"
            :on-next #(dispatch [:punk.ui.browser/nav-to
                                 (-> state :current :idx) %2 %3])}]]]]
       ;; Entries
