@@ -217,7 +217,8 @@
     [:div {:style {:background "#eee"
                    :padding "8px"
                    :position "sticky"
-                   :top 0}}
+                   :top 0
+                   :z-index "2"}}
      [:span {:style {:font-size "1.17em"
                      :font-weight "500"}}
       title]]
