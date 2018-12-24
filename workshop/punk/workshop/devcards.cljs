@@ -1,6 +1,6 @@
 (ns punk.workshop.devcards
   (:require [devcards.core :as dc :include-macros true]
-            [punk.ui.core :as punk-ui]
+            [punk.ui.components :as punk-ui]
             [hx.react :as hx]))
 
 (devcards.core/start-devcard-ui!)

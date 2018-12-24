@@ -7,7 +7,8 @@
             [clojure.string :as s]
             [clojure.core.async :as a]
             [frame.core :as f]
-            [punk.ui.views :as views]))
+            [punk.ui.views :as views]
+            [punk.ui.components :as pc]))
 
 ;;
 ;; Data structures
@@ -193,9 +194,6 @@
 ;; Browser panes
 ;;
 
-(defnc Style [{:keys [children]}]
-  [:style {:dangerouslySetInnerHTML #js {:__html (s/join "\n" children)}}])
-
 (def layout
   #js [#js {:i "next" :x 0 :y 0 :w 12 :h 6}
        #js {:i "current" :x 0 :y 6 :w 12 :h 6}
@@ -203,31 +201,7 @@
 
 (def GridLayoutWithWidth (GridLayout/WidthProvider GridLayout))
 
-(defnc Pane [{:keys [title id controls children]}]
-  [:div {:id id
-         :style {:border "1px solid #ddd"
-                 :box-shadow "2px 2px 1px 1px #eee"
-                 :height "100%"
-                 :background "white"
-                 :position "relative"
-                 :display "flex"
-                 :flex-direction "column"}}
-   [:div {:style {:overflow "auto"
-                  :flex 1}}
-    [:div {:style {:background "#eee"
-                   :padding "8px"
-                   :position "sticky"
-                   :top 0
-                   :z-index "2"}}
-     [:span {:style {:font-size "1.17em"
-                     :font-weight "500"}}
-      title]]
-    [:div {:style {:padding "8px"}}
-     children]]
-   (when controls
-     [:div {:style {:padding "3px 8px"
-                    :background "#eee"}}
-      controls])])
+
 
 (defnc Browser [_]
   (let [state (<-deref ui-db)
@@ -243,7 +217,7 @@
     (js/console.log next-views)
     [:div {:style {:height "100%"}
            :id "punk-container"}
-     [Style
+     [pc/Style
       "#punk-container {"
       "  font-family: sans-serif;"
       "  margin: 0;"
@@ -284,10 +258,11 @@
       {:class "layout"
        :layout layout
        :cols 12
-       :rowHeight 30}
+       :rowHeight 30
+       :draggableHandle ".titlebar"}
       ;; Next
       [:div {:key "next"}
-       [Pane {:title "Next"}
+       [pc/Pane {:title "Next"}
         [:select {:value (str (:id next-view))
                   :on-change #(dispatch [:punk.ui.browser/select-view-type
                                          (keyword (subs (.. % -target -value) 1))])}
@@ -301,7 +276,7 @@
            :on-next #(dispatch [:punk.ui.browser/view-next])}]]]]
       ;; Current
       [:div {:key "current"}
-       [Pane {:title "Current"
+       [pc/Pane {:title "Current"
               :controls [:div
                          [:button {:type "button"
                                    :style {:width "60px"}
@@ -316,7 +291,7 @@
                                 (-> state :current :idx) %2 %3])}]]]]
       ;; Entries
       [:div {:key "entries"}
-       [Pane {:title "Entries" :id "entries"}
+       [pc/Pane {:title "Entries" :id "entries"}
         (for [[idx entry] (reverse (map-indexed vector (:entries state)))]
           [:div {:on-click #(dispatch [:punk.ui.browser/view-entry entry])
                  :class "item"}
