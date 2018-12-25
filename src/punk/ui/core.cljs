@@ -266,11 +266,12 @@
          (for [vid (map (comp str :id) next-views)]
            [:option {:key vid} vid])]
         [:div {:style {:display "flex"
-                       :flex-direction "column"}}
+                      :flex-direction "column"}
+               }
          [(:view next-view)
           {:data (-> state :next :value)
            :id "next"
-           :on-next #(dispatch [:punk.ui.browser/view-next])}]]]]
+           :nav #(dispatch [:punk.ui.browser/view-next])}]]]]
       ;; Current
       [:div {:key "current"}
        [pc/Pane {:title "Current"
@@ -284,7 +285,7 @@
                        :flex-direction "column"}}
          [(:view current-view)
           {:data (-> state :current :value)
-           :on-next #(dispatch [:punk.ui.browser/nav-to
+           :nav #(dispatch [:punk.ui.browser/nav-to
                                 (-> state :current :idx) %2 %3])}]]]]
       ;; Entries
       [:div {:key "entries"}
