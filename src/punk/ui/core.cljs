@@ -290,10 +290,9 @@
       ;; Entries
       [:div {:key "entries"}
        [pc/Pane {:title "Entries" :id "entries"}
-        (for [[idx entry] (reverse (map-indexed vector (:entries state)))]
-          [:div {:on-click #(dispatch [:punk.ui.browser/view-entry entry])
-                 :class "item"}
-           idx " " (prn-str (:value entry))])]]]]))
+        [pc/Table {:cols [[:id first {:flex 1}]
+                          [:value second {:flex 10}]]
+                   :data (reverse (map-indexed vector (:entries state)))}]]]]]))
 
 (defn ^:export start! [node]
   (a/go-loop []
