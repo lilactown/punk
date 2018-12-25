@@ -50,5 +50,5 @@
               :key (key-fn d)
               :class "item"
               :on-click #(on-entry-click (key-fn d))}
-        (for [[_ parse style] cols]
-          [:div {:style style} (parse d)])])]))
+        (for [[_ pick style] cols]
+          [:div {:style style} (prn-str (pick d))])])]))
