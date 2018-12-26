@@ -37,8 +37,6 @@
 ;; UI state
 ;;
 
-#'views/MapView
-
 (defonce ui-db (atom {:entries []
                       :history []
                       :current nil
@@ -50,21 +48,21 @@
 
                               {:id :punk.view/map
                                :match map?
-                               :view views/MapView}
+                               :view #'views/MapView}
 
                               {:id :punk.view/set
                                :match set?
-                               :view views/SetView}
+                               :view #'views/SetView}
 
                               {:id :punk.view/coll
                                :match (every-pred
                                        coll?
                                        (comp not map?))
-                               :view views/CollView}
+                               :view #'views/CollView}
 
                               {:id :punk.view/edn
                                :match any?
-                               :view views/EdnView}]
+                               :view #'views/EdnView}]
                       :view/selected nil}))
 
 (defonce ui-frame (f/create-frame
@@ -294,7 +292,7 @@
        [pc/Pane {:title "Entries" :id "entries"}
         (let [entries (reverse (map-indexed vector (:entries state)))]
           [pc/Table {:cols [[:id first {:flex 1}]
-                            [:value second {:flex 10}]]
+                            [:value (comp :value second) {:flex 10}]]
                      :on-entry-click (fn [_ entry]
                                        (dispatch [:punk.ui.browser/view-entry (second entry)]))
                      :data entries}])]]]]))
