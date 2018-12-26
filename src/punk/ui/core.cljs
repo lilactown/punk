@@ -37,6 +37,8 @@
 ;; UI state
 ;;
 
+#'views/MapView
+
 (defonce ui-db (atom {:entries []
                       :history []
                       :current nil
@@ -290,9 +292,12 @@
       ;; Entries
       [:div {:key "entries"}
        [pc/Pane {:title "Entries" :id "entries"}
-        [pc/Table {:cols [[:id first {:flex 1}]
-                          [:value second {:flex 10}]]
-                   :data (reverse (map-indexed vector (:entries state)))}]]]]]))
+        (let [entries (reverse (map-indexed vector (:entries state)))]
+          [pc/Table {:cols [[:id first {:flex 1}]
+                            [:value second {:flex 10}]]
+                     :on-entry-click (fn [_ entry]
+                                       (dispatch [:punk.ui.browser/view-entry (second entry)]))
+                     :data entries}])]]]]))
 
 (defn ^:export start! [node]
   (a/go-loop []

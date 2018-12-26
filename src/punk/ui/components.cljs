@@ -49,6 +49,6 @@
                       :margin "3px 0"}
               :key (key-fn d)
               :class "item"
-              :on-click #(on-entry-click (key-fn d))}
+              :on-click #(on-entry-click (key-fn d) d)}
         (for [[_ pick style] cols]
           [:div {:style style} (prn-str (pick d))])])]))
