@@ -219,7 +219,7 @@
            :id "punk-container"}
      [pc/Style
       "#punk-container {"
-      "  font-family: sans-serif;"
+      "  font-family: 'Source Sans Pro', sans-serif;"
       "  margin: 0;"
       "}"
      (str "#current-grid {"
@@ -266,8 +266,7 @@
          (for [vid (map (comp str :id) next-views)]
            [:option {:key vid} vid])]
         [:div {:style {:display "flex"
-                      :flex-direction "column"}
-               }
+                      :flex-direction "column"}}
          [(:view next-view)
           {:data (-> state :next :value)
            :id "next"
@@ -292,7 +291,8 @@
        [pc/Pane {:title "Entries" :id "entries"}
         (let [entries (reverse (map-indexed vector (:entries state)))]
           [pc/Table {:cols [[:id first {:flex 1}]
-                            [:value (comp :value second) {:flex 10}]]
+                            [:value (comp :value second) {:flex 5}]
+                            [:meta (comp :meta second) {:flex 5}]]
                      :on-entry-click (fn [_ entry]
                                        (dispatch [:punk.ui.browser/view-entry (second entry)]))
                      :data entries}])]]]]))
