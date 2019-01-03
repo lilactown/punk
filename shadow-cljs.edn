@@ -11,4 +11,9 @@
              :compiler-options {:devcards true}
              :devtools {:http-root    "public/workshop"
                         :http-port    8700
-                        :preloads     [devtools.preload]}}}}
+                        :preloads     [devtools.preload]}}
+
+  :app {:target :browser
+        :output-dir "target/out"
+        ;;:asset-path "/js"
+        :modules {:main {:entries [punk.ui.core]}}}}}
