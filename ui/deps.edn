@@ -5,4 +5,5 @@
         devcards {:mvn/version "0.2.5"}
         lilactown/hx {:mvn/version "0.2.5"}
         lilactown/hx-frisk {:mvn/version "0.0.2-SNAPSHOT"}
-        frame {:local/root "../frame"}}}
+        frame {:local/root "../frame"}
+        punk/adapter-web {:local/root "../adapter-web"}}}
