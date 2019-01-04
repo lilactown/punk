@@ -1,3 +1,2 @@
-{:paths ["src" "test" "workshop"]
- :deps {org.clojure/clojurescript {:git/url "https://github.com/clojure/clojurescript.git"
-                                   :sha "82c10925eb8d9c3cecf23447ddf4e1342f120b69"}}}
+{:paths ["src" "workshop"]
+ :deps {punk/adapter-web {:local/root "../adapter-web"}}}
