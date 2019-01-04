@@ -1,4 +1,4 @@
-{:paths ["src" "test" "workshop"]
+{:paths ["src" "workshop"]
  :deps {org.clojure/clojurescript {:git/url "https://github.com/clojure/clojurescript.git"
                                    :sha "82c10925eb8d9c3cecf23447ddf4e1342f120b69"}
         binaryage/devtools {:mvn/version "0.9.7"}

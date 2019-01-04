@@ -1,6 +1,1 @@
-node_modules
-.shadow-cljs/
 .cpcache/
-.nrepl-port
-public/workshop/js
-/target/
