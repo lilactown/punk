@@ -43,6 +43,7 @@
                       :current nil
                       :next/loading false
                       :next nil
+                      :collapsed? true
                       :views [{:id :punk.view/nil
                                :match nil?
                                :view nil}
@@ -101,6 +102,12 @@
 ;;
 ;; UI Events
 ;;
+
+(f/reg-event-fx
+ ui-frame :punk.ui.drawer/toggle
+ []
+ (fn [{:keys [db]} _]
+   {:db (update db :collapsed? not)}))
 
 (f/reg-event-fx
  ui-frame :punk.ui.browser/view-entry
@@ -202,8 +209,8 @@
 
 (def GridLayoutWithWidth (GridLayout/WidthProvider GridLayout))
 
-(defnc Browser [_]
-  (let [state (<-deref ui-db)
+(defnc Browser [{:keys [state]}]
+  (let [
         next-views (-> (:views state)
                        (match-views (-> state :next :value)))
 
@@ -291,15 +298,16 @@
           [pc/Table {:cols [[:id first {:flex 1}]
                             [:value (comp :value second) {:flex 11}]
                             ;; [:meta (comp :meta second) {:flex 5}]
-]
+                            ]
                      :on-entry-click (fn [_ entry]
                                        (dispatch [:punk.ui.browser/view-entry (second entry)]))
                      :data entries}])]]]]))
 
 (defnc Drawer [_]
-  (let [collapsed? (<-state true)]
+  (let [state (<-deref ui-db)
+        collapsed? (:collapsed? state)]
   [:div {:style {:position "absolute"
-                 :width (if @collapsed? "25px" "800px")
+                 :width (if collapsed? "25px" "800px")
                  :top 0
                  :bottom 0
                  :right 0
@@ -317,21 +325,21 @@
     "}"]
    [:div {:style {:display "flex"}}
     [:div {:id "punk-drawer"
-           :on-click #(swap! collapsed? not)}
+           :on-click #(dispatch [:punk.ui.drawer/toggle])}
      [:div {:style {:position "absolute"
                     :text-align "center"
                     :left 0
                     :right 0
                     :top 10}}
-      (if @collapsed? "<<" ">>")]
+      (if collapsed? "<<" ">>")]
      [:div {:style {:position "absolute"
                     :text-align "center"
                     :left 0
                     :right 0
                     :bottom 10}}
-      (if @collapsed? "<<" ">>")]]
+      (if collapsed? "<<" ">>")]]
     [:div {:style {:flex 1}}
-     [Browser]]]]))
+     [Browser {:state state}]]]]))
 
 (defn- external-handler [ev]
   (dispatch (edn/read-string ev)))

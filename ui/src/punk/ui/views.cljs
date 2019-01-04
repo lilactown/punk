@@ -14,7 +14,7 @@
 (defnc CollView [{:keys [data nav] :as props}]
   [pc/Table (merge props
                    {:cols [[:idx first {:flex 1}]
-                           [:value second {:flex 3}]]
+                           [:value second {:flex 11}]]
                     :on-entry-click (fn [key] (nav data key (get data key)))
                     :data (map-indexed vector data)}
                    {:nav nil})])
