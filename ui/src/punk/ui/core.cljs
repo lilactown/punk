@@ -1,6 +1,6 @@
 (ns punk.ui.core
   (:require [hx.react :as hx :refer [defnc]]
-            [hx.react.hooks :refer [<-deref]]
+            [hx.react.hooks :refer [<-deref <-state]]
             ["react-dom" :as react-dom]
             ["react-grid-layout" :as GridLayout]
             [goog.object :as gobj]
@@ -202,8 +202,6 @@
 
 (def GridLayoutWithWidth (GridLayout/WidthProvider GridLayout))
 
-
-
 (defnc Browser [_]
   (let [state (<-deref ui-db)
         next-views (-> (:views state)
@@ -222,7 +220,7 @@
       "  font-family: 'Source Sans Pro', sans-serif;"
       "  margin: 0;"
       "}"
-     (str "#current-grid {"
+      (str "#current-grid {"
            "       box-shadow: 2px 2px 1px 1px #eee;"
            "       border: 1px solid #eee;"
            "}")
@@ -266,7 +264,7 @@
          (for [vid (map (comp str :id) next-views)]
            [:option {:key vid} vid])]
         [:div {:style {:display "flex"
-                      :flex-direction "column"}}
+                       :flex-direction "column"}}
          [(:view next-view)
           {:data (-> state :next :value)
            :id "next"
@@ -285,17 +283,55 @@
          [(:view current-view)
           {:data (-> state :current :value)
            :nav #(dispatch [:punk.ui.browser/nav-to
-                                (-> state :current :idx) %2 %3])}]]]]
+                            (-> state :current :idx) %2 %3])}]]]]
       ;; Entries
       [:div {:key "entries"}
        [pc/Pane {:title "Entries" :id "entries"}
         (let [entries (reverse (map-indexed vector (:entries state)))]
           [pc/Table {:cols [[:id first {:flex 1}]
-                            [:value (comp :value second) {:flex 5}]
-                            [:meta (comp :meta second) {:flex 5}]]
+                            [:value (comp :value second) {:flex 11}]
+                            ;; [:meta (comp :meta second) {:flex 5}]
+]
                      :on-entry-click (fn [_ entry]
                                        (dispatch [:punk.ui.browser/view-entry (second entry)]))
                      :data entries}])]]]]))
+
+(defnc Drawer [_]
+  (let [collapsed? (<-state true)]
+  [:div {:style {:position "absolute"
+                 :width (if @collapsed? "25px" "800px")
+                 :top 0
+                 :bottom 0
+                 :right 0
+                 :z-index 10}}
+   [pc/Style
+    "#punk-drawer {"
+    " background: #eee;"
+    " height 100%;"
+    " width: 25px;"
+    " position: relative;"
+    "}"
+    "#punk-drawer:hover {"
+    " background: #ddd;"
+    " cursor: pointer;"
+    "}"]
+   [:div {:style {:display "flex"}}
+    [:div {:id "punk-drawer"
+           :on-click #(swap! collapsed? not)}
+     [:div {:style {:position "absolute"
+                    :text-align "center"
+                    :left 0
+                    :right 0
+                    :top 10}}
+      (if @collapsed? "<<" ">>")]
+     [:div {:style {:position "absolute"
+                    :text-align "center"
+                    :left 0
+                    :right 0
+                    :bottom 10}}
+      (if @collapsed? "<<" ">>")]]
+    [:div {:style {:flex 1}}
+     [Browser]]]]))
 
 (defn- external-handler [ev]
   (dispatch (edn/read-string ev)))
@@ -304,13 +340,13 @@
   {:pre [(not (nil? in-stream))
          (not (nil? out-stream))]}
   (.unsubscribe ^js in-stream
-              external-handler)
+                external-handler)
   (.subscribe ^js in-stream
               external-handler)
   (f/reg-fx
    ui-frame :emit
    (fn [v]
      (.put ^js out-stream (pr-str v))))
-  (react-dom/render (hx/f [Browser]) node))
+  (react-dom/render (hx/f [Drawer]) node))
 
 #_(dispatch [:punk.ui.browser/select-view-type :punk.view/frisk])

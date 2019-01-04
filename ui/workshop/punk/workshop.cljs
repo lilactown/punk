@@ -2,6 +2,13 @@
   (:require [punk.adapter.web]
             [punk.ui.views.frisk]))
 
+(def app ""
+  "<div style=\"text-align: center; padding: 10px;\">foo bar</div>")
+
+(set! (-> js/document
+          (.-body)
+          (.-innerHTML)) app)
+
 (defn ^{:export true
         :dev/after-load true}
   start []
