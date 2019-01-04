@@ -5,25 +5,40 @@
             [cljs.tools.reader.edn :as edn]
             [clojure.core.async :as a]))
 
-(defonce in-stream (a/chan))
+(defonce in-chan (a/chan))
 
-(defonce out-stream (a/chan))
+(defonce out-chan (a/chan))
 
-(defonce in-loop
+;; Handles incoming events from the UI and passes them to the user-space frame
+(defonce event-loop
   (a/go-loop []
-    (let [ev (a/<! out-stream)]
+    (let [ev (a/<! out-chan)]
       (punk/dispatch (edn/read-string ev))
+      (recur))))
+
+(defonce subscribers (atom #{}))
+
+(defonce subscriber-loop
+  (a/go-loop []
+    (let [ev (a/<! in-chan)]
+      (doseq [sub-handler @subscribers]
+        (sub-handler ev))
       (recur))))
 
 (f/reg-fx
  punk/frame :emit
  (fn [v]
-   (a/put! in-stream (pr-str v))))
+   (a/put! in-chan (pr-str v))))
 
 (punk/add-taps!)
 
 (def start-ui!
   (gobj/getValueByKeys js/window "punk" "ui" "core" "start_BANG_"))
+
+(def in-stream #js {:subscribe #(swap! subscribers conj %)
+                    :unsubscribe #(swap! subscribers disj %)})
+
+(def out-stream #js {:put (fn [v] (a/put! out-chan v))})
 
 (defn ^{:export true}
   start []

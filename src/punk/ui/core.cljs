@@ -297,18 +297,21 @@
                                        (dispatch [:punk.ui.browser/view-entry (second entry)]))
                      :data entries}])]]]]))
 
+(defn- external-handler [ev]
+  (dispatch (edn/read-string ev)))
+
 (defn ^:export start! [node in-stream out-stream]
-  {:pre [(not (nil? in-stream))]}
+  {:pre [(not (nil? in-stream))
+         (not (nil? out-stream))]}
   (js/console.log in-stream)
-  (a/go-loop []
-    (let [ev (a/<! in-stream)]
-      (println ev)
-      (dispatch (edn/read-string ev))
-      (recur)))
+  (.unsubscribe ^js in-stream
+              external-handler)
+  (.subscribe ^js in-stream
+              external-handler)
   (f/reg-fx
    ui-frame :emit
    (fn [v]
-     (a/put! out-stream (pr-str v))))
+     (.put ^js out-stream (pr-str v))))
   (react-dom/render (hx/f [Browser]) node))
 
 #_(dispatch [:punk.ui.browser/select-view-type :punk.view/frisk])
