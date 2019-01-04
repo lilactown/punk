@@ -104,7 +104,7 @@
 
 (f/reg-event-fx
  ui-frame :punk.ui.browser/view-entry
- [debug-db debug-event]
+ [#_debug-db #_debug-event]
  (fn [{:keys [db]} [_ x]]
    {:db (assoc db
                :current x
@@ -114,7 +114,7 @@
 
 (f/reg-event-fx
  ui-frame :punk.ui.browser/view-next
- [#_debug-db debug-event]
+ [#_debug-db #_debug-event]
  (fn [{:keys [db]} _]
    {:db (-> db
             (assoc
@@ -126,7 +126,7 @@
 
 (f/reg-event-fx
  ui-frame :punk.ui.browser/history-back
- [#_debug-db debug-event]
+ [#_debug-db #_debug-event]
  (fn [{:keys [db]} _]
    {:db (-> db
             (update :history pop)
@@ -136,7 +136,7 @@
 
 (f/reg-event-fx
  ui-frame :punk.ui.browser/nav-to
- [#_debug-db debug-event]
+ [#_debug-db #_debug-event]
  (fn [{:keys [db]} [_ idx k v]]
    {:db (assoc db :next/loading true)
     :emit [:nav idx k v]}))
@@ -149,7 +149,7 @@
 
 (f/reg-event-fx
  ui-frame :punk.ui.browser/register-view
- [debug-db]
+ [#_debug-db]
  (fn [{:keys [db]} [_ v]]
    {:db (update db :views conj v)}))
 
@@ -178,13 +178,13 @@
 
 (f/reg-event-fx
  ui-frame :entry
- [#_debug-db debug-event]
+ [#_debug-db #_debug-event]
  (fn [cofx [_ idx x]]
    {:db (update (:db cofx) :entries conj (assoc x :idx idx))}))
 
 (f/reg-event-fx
  ui-frame :nav
- [debug-event debug-db]
+ [#_debug-event #_debug-db]
  (fn [{:keys [db]} [_ idx x]]
    {:db (assoc db
                :next/loading false
@@ -303,7 +303,6 @@
 (defn ^:export start! [node in-stream out-stream]
   {:pre [(not (nil? in-stream))
          (not (nil? out-stream))]}
-  (js/console.log in-stream)
   (.unsubscribe ^js in-stream
               external-handler)
   (.subscribe ^js in-stream
