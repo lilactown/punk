@@ -1,0 +1,12 @@
+;; shadow-cljs configuration
+{:deps true
+ :builds
+ {:app {:target :browser
+        :output-dir "public/app/js"
+        :asset-path "/js"
+        :modules {:main {:entries [punk-example.core]}}
+        :compiler-options {:devcards true}
+        :devtools {:http-root    "public/app"
+                   :http-port    8700}}
+  }
+ }
