@@ -6,6 +6,7 @@
             [goog.object :as gobj]
             [clojure.string :as s]
             [clojure.core.async :as a]
+            [cljs.tools.reader.edn :as edn]
             [frame.core :as f]
             [punk.ui.views :as views]
             [punk.ui.components :as pc]))
@@ -214,7 +215,6 @@
         current-view (-> (:views state)
                          (match-views (-> state :current :value))
                          (first))]
-    (js/console.log next-views)
     [:div {:style {:height "100%"}
            :id "punk-container"}
      [pc/Style
@@ -297,16 +297,18 @@
                                        (dispatch [:punk.ui.browser/view-entry (second entry)]))
                      :data entries}])]]]]))
 
-(defn ^:export start! [node]
+(defn ^:export start! [node in-stream out-stream]
+  {:pre [(not (nil? in-stream))]}
+  (js/console.log in-stream)
   (a/go-loop []
-    (let [ev (a/<! (gobj/get js/window "PUNK_IN_STREAM"))]
+    (let [ev (a/<! in-stream)]
       (println ev)
-      (dispatch ev)
+      (dispatch (edn/read-string ev))
       (recur)))
   (f/reg-fx
    ui-frame :emit
    (fn [v]
-     (a/put! (gobj/get js/window "PUNK_OUT_STREAM") v)))
+     (a/put! out-stream (pr-str v))))
   (react-dom/render (hx/f [Browser]) node))
 
 #_(dispatch [:punk.ui.browser/select-view-type :punk.view/frisk])
