@@ -307,17 +307,20 @@
   (let [state (<-deref ui-db)
         collapsed? (:collapsed? state)]
   [:div {:style {:position "absolute"
-                 :width (if collapsed? "25px" "800px")
+                 :width (if collapsed? "20px" "800px")
                  :top 0
                  :bottom 0
                  :right 0
-                 :z-index 10}}
+                 :z-index 10
+                 ;; :box-shadow "rgb(238, 238, 238) -2px 0px 1px 1px"
+                 }}
    [pc/Style
     "#punk-drawer {"
-    " background: #eee;"
+    " background: #f3f3f3;"
     " height 100%;"
-    " width: 25px;"
+    " width: 20px;"
     " position: relative;"
+    " border: 1px solid #eee"
     "}"
     "#punk-drawer:hover {"
     " background: #ddd;"
@@ -330,14 +333,16 @@
                     :text-align "center"
                     :left 0
                     :right 0
-                    :top 10}}
-      (if collapsed? "<<" ">>")]
+                    :top 10
+                    :font-size "10px"}}
+      (if collapsed? ">>" "<<")]
      [:div {:style {:position "absolute"
                     :text-align "center"
                     :left 0
                     :right 0
-                    :bottom 10}}
-      (if collapsed? "<<" ">>")]]
+                    :bottom 10
+                    :font-size "10px"}}
+      (if collapsed? ">>" "<<")]]
     [:div {:style {:flex 1}}
      [Browser {:state state}]]]]))
 
