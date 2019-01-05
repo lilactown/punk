@@ -1,6 +1,6 @@
 (ns punk.ui.core
   (:require [hx.react :as hx :refer [defnc]]
-            [hx.react.hooks :refer [<-deref <-state]]
+            [hx.react.hooks :refer [<-deref <-state <-effect]]
             ["react-dom" :as react-dom]
             ["react-grid-layout" :as GridLayout]
             [goog.object :as gobj]
@@ -12,27 +12,31 @@
             [punk.ui.components :as pc]))
 
 ;;
-;; Data structures
+;; Helpers
 ;;
 
-(defprotocol WithIndex
-  (with-index [this]))
+;; Window-size hook based on https://github.com/rehooks/window-size/blob/master/index.js
 
-(extend-protocol WithIndex
-  cljs.core/PersistentVector
-  (with-index [v] (map-indexed vector v))
+(defn get-size []
+  {:inner-height (.-innerHeight js/window)
+   :inner-width (.-innerWidth js/window)
+   :outer-height (.-outerHeight js/window)
+   :outer-width (.-outerWidth js/window)})
 
-  cljs.core/PersistentHashSet
-  (with-index [s] (map-indexed vector s))
+(defn <-window-size []
+  (let [window-size (<-state (get-size))
+        handle-resize #(reset! window-size (get-size))]
+    ;; Effect adds the event handler to the window resize event
+    (<-effect
+     (fn []
+       (.addEventListener js/window "resize" handle-resize)
+       ;; return the unsubscribe function
+       #(.removeEventListener js/window "resize" handle-resize))
+     ;; only re-sub on re-mount
+     [])
 
-  cljs.core/List
-  (with-index [s] (map-indexed vector s))
-
-  cljs.core/LazySeq
-  (with-index [s] (map-indexed vector s))
-
-  default
-  (with-index [x] x))
+    ;; return value
+    @window-size))
 
 ;;
 ;; UI state
@@ -210,8 +214,7 @@
 (def GridLayoutWithWidth (GridLayout/WidthProvider GridLayout))
 
 (defnc Browser [{:keys [state]}]
-  (let [
-        next-views (-> (:views state)
+  (let [next-views (-> (:views state)
                        (match-views (-> state :next :value)))
 
         next-view (if (:view/selected state)
@@ -225,6 +228,7 @@
      [pc/Style
       "#punk-container {"
       "  font-family: 'Source Sans Pro', sans-serif;"
+      "  background: white;"
       "  margin: 0;"
       "}"
       (str "#current-grid {"
@@ -298,53 +302,53 @@
           [pc/Table {:cols [[:id first {:flex 1}]
                             [:value (comp :value second) {:flex 11}]
                             ;; [:meta (comp :meta second) {:flex 5}]
-                            ]
+]
                      :on-entry-click (fn [_ entry]
                                        (dispatch [:punk.ui.browser/view-entry (second entry)]))
                      :data entries}])]]]]))
 
 (defnc Drawer [_]
   (let [state (<-deref ui-db)
-        collapsed? (:collapsed? state)]
-  [:div {:style {:position "absolute"
-                 :width (if collapsed? "20px" "800px")
-                 :top 0
-                 :bottom 0
-                 :right 0
-                 :z-index 10
-                 ;; :box-shadow "rgb(238, 238, 238) -2px 0px 1px 1px"
-                 }}
-   [pc/Style
-    "#punk-drawer {"
-    " background: #f3f3f3;"
-    " height 100%;"
-    " width: 20px;"
-    " position: relative;"
-    " border: 1px solid #eee"
-    "}"
-    "#punk-drawer:hover {"
-    " background: #ddd;"
-    " cursor: pointer;"
-    "}"]
-   [:div {:style {:display "flex"}}
-    [:div {:id "punk-drawer"
-           :on-click #(dispatch [:punk.ui.drawer/toggle])}
-     [:div {:style {:position "absolute"
-                    :text-align "center"
-                    :left 0
-                    :right 0
-                    :top 10
-                    :font-size "10px"}}
-      (if collapsed? ">>" "<<")]
-     [:div {:style {:position "absolute"
-                    :text-align "center"
-                    :left 0
-                    :right 0
-                    :bottom 10
-                    :font-size "10px"}}
-      (if collapsed? ">>" "<<")]]
-    [:div {:style {:flex 1}}
-     [Browser {:state state}]]]]))
+        collapsed? (:collapsed? state)
+        win-size (<-window-size)]
+    [:div {:style {:position "absolute"
+                   :width (if collapsed? "20px" (/ (:inner-width win-size) 2))
+                   :top 0
+                   :bottom 0
+                   :right 0
+                   :z-index 10}}
+     [pc/Style
+      "#punk-drawer {"
+      " background: #f3f3f3;"
+      " height: 100%;"
+      " width: 20px;"
+      " position: relative;"
+      " border: 1px solid #eee;"
+      "}"
+      "#punk-drawer:hover {"
+      " background: #ddd;"
+      " cursor: pointer;"
+      "}"]
+     [:div {:style {:display "flex"}}
+      [:div {:id "punk-drawer"
+             :on-click #(dispatch [:punk.ui.drawer/toggle])}
+       [:div {:style {:position "absolute"
+                      :text-align "center"
+                      :left 0
+                      :right 0
+                      :top 10
+                      :font-size "10px"}}
+        (if collapsed? ">>" "<<")]
+       [:div {:style {:position "absolute"
+                      :text-align "center"
+                      :left 0
+                      :right 0
+                      :bottom 10
+                      :font-size "10px"}}
+        (if collapsed? ">>" "<<")]]
+      (when (not collapsed?)
+        [:div {:style {:flex 1}}
+         [Browser {:state state}]])]]))
 
 (defn- external-handler [ev]
   (dispatch (edn/read-string ev)))
