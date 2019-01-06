@@ -365,5 +365,3 @@
    (fn [v]
      (.put ^js out-stream (pr-str v))))
   (react-dom/render (hx/f [Drawer]) node))
-
-#_(dispatch [:punk.ui.browser/select-view-type :punk.view/frisk])

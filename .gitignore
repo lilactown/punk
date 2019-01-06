@@ -1,1 +1,3 @@
 .cpcache/
+pom.xml*
+*/target/
