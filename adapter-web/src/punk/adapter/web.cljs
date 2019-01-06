@@ -30,8 +30,6 @@
  (fn [v]
    (a/put! in-chan (pr-str v))))
 
-(punk/add-taps!)
-
 (def start-ui!
   (gobj/getValueByKeys js/window "punk" "ui" "core" "start_BANG_"))
 
@@ -47,4 +45,6 @@
                         (. new-container setAttribute "id" "punk")
                         (-> js/document .-body (.appendChild new-container))
                         new-container))]
+    (punk/remove-taps!)
+    (punk/add-taps!)
     (start-ui! container in-stream out-stream)))
