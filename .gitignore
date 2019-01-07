@@ -1,3 +1,4 @@
 .cpcache/
 pom.xml*
 */target/
+example/public/app/punk.js

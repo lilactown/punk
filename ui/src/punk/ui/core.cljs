@@ -1,6 +1,6 @@
 (ns punk.ui.core
   (:require [hx.react :as hx :refer [defnc]]
-            [hx.react.hooks :refer [<-deref <-state <-effect]]
+            [hx.react.hooks :refer [<-deref <-state <-effect <-ref]]
             ["react-dom" :as react-dom]
             ["react-grid-layout" :as GridLayout]
             [goog.object :as gobj]
@@ -38,6 +38,18 @@
     ;; return value
     @window-size))
 
+(defn <-mouse-move [cb]
+  (<-effect (fn []
+              (.addEventListener js/window "mousemove" cb)
+              #(.removeEventListener js/window "mousemove" cb))
+            [cb]))
+
+(defn <-mouse-up [cb]
+  (<-effect (fn []
+              (.addEventListener js/window "mouseup" cb)
+              #(.removeEventListener js/window "mouseup" cb))
+            [cb]))
+
 ;;
 ;; UI state
 ;;
@@ -48,6 +60,7 @@
                       :next/loading false
                       :next nil
                       :collapsed? true
+                      :drawer-width 50
                       :views [{:id :punk.view/nil
                                :match nil?
                                :view nil}
@@ -171,6 +184,11 @@
    ;; filterv here is important to preserve order
    (let [views' (filterv #(not= id (:id %)) (:views db))]
      {:db (assoc db :views views')})))
+
+(f/reg-event-fx
+ ui-frame :punk.ui.drawer/change-width []
+ (fn [{:keys [db]} [_ width]]
+   {:db (assoc db :drawer-width width)}))
 
 (defn register-view!
   [& {:keys [id match view] :as v}]
@@ -307,30 +325,47 @@
                                        (dispatch [:punk.ui.browser/view-entry (second entry)]))
                      :data entries}])]]]]))
 
+(def dragging? (atom false))
+
 (defnc Drawer [_]
   (let [state (<-deref ui-db)
         collapsed? (:collapsed? state)
-        win-size (<-window-size)]
+        win-size (<-window-size)
+        move-handler #(when @dragging?
+                          (dispatch
+                           [:punk.ui.drawer/change-width (* 100
+                                                            (/ (- (:inner-width win-size) (.. % -clientX))
+                                                               (:inner-width win-size)))]))]
+    (<-mouse-move move-handler)
+    (<-mouse-up #(reset! dragging? false))
     [:div {:style {:position "absolute"
-                   :width (if collapsed? "20px" (/ (:inner-width win-size) 2))
+                   :width (if collapsed? "20px" (/ (:inner-width win-size)
+                                                   (/ 100 (:drawer-width state))))
                    :top 0
                    :bottom 0
                    :right 0
                    :z-index 10}}
      [pc/Style
-      "#punk-drawer {"
+      "#punk__drawer-toggle {"
       " background: #f3f3f3;"
       " height: 100%;"
       " width: 20px;"
       " position: relative;"
       " border: 1px solid #eee;"
       "}"
-      "#punk-drawer:hover {"
+      "#punk__drawer-toggle:hover {"
       " background: #ddd;"
       " cursor: pointer;"
-      "}"]
+      "}"
+      "#punk__drawer-dragger { height: 100%; width: 3px; }"
+      "#punk__drawer-dragger:hover { cursor: col-resize; }"]
      [:div {:style {:display "flex"}}
-      [:div {:id "punk-drawer"
+      (when-not collapsed?
+        [:div {:id "punk__drawer-dragger"
+               :on-mouse-down #(do
+                                 (.preventDefault %)
+                                 (reset! dragging? true))}])
+      [:div {:id "punk__drawer-toggle"
              :on-click #(dispatch [:punk.ui.drawer/toggle])}
        [:div {:style {:position "absolute"
                       :text-align "center"
@@ -353,15 +388,15 @@
 (defn- external-handler [ev]
   (dispatch (edn/read-string ev)))
 
-(defn ^:export start! [node in-stream out-stream]
-  {:pre [(not (nil? in-stream))
-         (not (nil? out-stream))]}
-  (.unsubscribe ^js in-stream
+(defn ^:export start! [node input output opts]
+  {:pre [(not (nil? input))
+         (not (nil? output))]}
+  (.unsubscribe ^js input
                 external-handler)
-  (.subscribe ^js in-stream
+  (.subscribe ^js input
               external-handler)
   (f/reg-fx
    ui-frame :emit
    (fn [v]
-     (.put ^js out-stream (pr-str v))))
+     (.put ^js output (pr-str v))))
   (react-dom/render (hx/f [Drawer]) node))
