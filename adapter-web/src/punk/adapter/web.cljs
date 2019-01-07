@@ -39,12 +39,14 @@
 (def out-stream #js {:put (fn [v] (a/put! out-chan v))})
 
 (defn ^{:export true}
-  start []
-  (let [container (or (. js/document getElementById "punk")
-                      (let [new-container (. js/document createElement "div")]
-                        (. new-container setAttribute "id" "punk")
-                        (-> js/document .-body (.appendChild new-container))
-                        new-container))]
-    (punk/remove-taps!)
-    (punk/add-taps!)
-    (start-ui! container in-stream out-stream)))
+  start
+  ([] (start nil))
+  ([opts]
+   (let [container (or (. js/document getElementById "punk")
+                       (let [new-container (. js/document createElement "div")]
+                         (. new-container setAttribute "id" "punk")
+                         (-> js/document .-body (.appendChild new-container))
+                         new-container))]
+     (punk/remove-taps!)
+     (punk/add-taps!)
+     (start-ui! container in-stream out-stream (pr-str opts)))))
