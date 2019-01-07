@@ -388,9 +388,18 @@
 (defn- external-handler [ev]
   (dispatch (edn/read-string ev)))
 
+(defn drawer-toggler []
+  (dispatch [:punk.ui.drawer/toggle]))
+
 (defn ^:export start! [node input output opts]
   {:pre [(not (nil? input))
          (not (nil? output))]}
+  (println "starting")
+  (.addEventListener
+   js/document "keydown"
+   (fn [ev]
+     (when (and (.-ctrlKey ev) (.-altKey ev) (= "KeyP" (.-code ev)))
+       (drawer-toggler))))
   (.unsubscribe ^js input
                 external-handler)
   (.subscribe ^js input
