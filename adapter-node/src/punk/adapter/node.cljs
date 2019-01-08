@@ -48,7 +48,8 @@
 
 (println "hi2")
 
-(defn -main [])
+(defn -main []
+  (start))
 
 #_(stop)
 #_(start)
