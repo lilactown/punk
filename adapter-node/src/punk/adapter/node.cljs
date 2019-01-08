@@ -3,37 +3,55 @@
             [punk.core :as punk]
             [frame.core :as f]
             [cljs.tools.reader.edn :as edn]
+            ["http" :as http]
             ["ws" :as ws]))
 
-(defonce ws-server (atom #js {:close (fn [])}))
+(defonce server (atom #js {:close (fn [])}))
 
 (defn start []
-  (let [-ws-server (ws/Server. #js {:port 9876})]
+  (let [http-server (.createServer http)
+        ws-server (ws/Server. #js {:noServer true})]
     (punk/remove-taps!)
     (punk/add-taps!)
-    (.on -ws-server "connection"
-         (fn [ws]
+
+    ;; setup the websocket
+    (.on ws-server "connection"
+         (fn connection [ws]
            (js/console.log "opened")
            (f/reg-fx
             punk/frame :emit
-            (fn [v]
+            (fn emit [v]
               (.send ws (pr-str v))))
            (.on ws "message"
-                (fn [m]
-                  (punk/dispatch (edn/read-string m))
-                  (js/console.log m)))
-           (.on ws "close" (fn [] (js/console.log "closed")))))
-    (reset! ws-server -ws-server)))
+                (fn message [m]
+                  (punk/dispatch (edn/read-string m))))
+           (.on ws "close" (fn close [] (js/console.log "closed")))))
+
+    ;; setup the http server
+    (.on http-server "upgrade"
+         (fn upgrade [req socket head]
+           (if (= (.-url req) "/ws")
+             (.handleUpgrade ws-server req socket head
+                             (fn done [ws]
+                               (.emit ws-server "connection" ws req)))
+             (.destroy socket))))
+
+    (.on http-server "close"
+         (fn close []
+           (.close ws-server)))
+
+    (.listen http-server 9876)
+    (reset! server http-server)))
 
 (defn stop []
-  (.close @ws-server))
+  (.close @server))
 
 (println "hi2")
 
 (defn -main [])
 
-#_(-stop)
-#_(-start)
+#_(stop)
+#_(start)
 
 #_(tap> {:foo 'bar [1234] 4567})
 
