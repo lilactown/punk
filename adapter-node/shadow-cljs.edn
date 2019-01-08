@@ -1,0 +1,10 @@
+;; shadow-cljs configuration
+{:deps {:aliases [:dev]}
+ :builds
+ {:app {:target :node-script
+        :output-to "target/app.js"
+        :main punk.adapter.node/-main
+        :modules {:main {:entries [punk-example.core]}}
+        :devtools {:autoload true}}
+  }
+ }

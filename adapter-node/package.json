@@ -1,0 +1,14 @@
+{
+  "name": "adapter-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Will Acton",
+  "dependencies": {
+    "shadow-cljs": "^2.7.13",
+    "ws": "^6.1.2"
+  }
+}
