@@ -74,7 +74,7 @@
 
 (f/reg-event-fx
  frame :tap
- [debug-event debug-fx]
+ []
  (fn [{:keys [db]} [_ x]]
    (let [db' (update db :entries conj x)
          idx (count (:entries db))
@@ -85,7 +85,7 @@
 
 (f/reg-event-fx
  frame :list
- [debug-event debug-fx]
+ []
  (fn [{:keys [db]} [_ x]]
    {:emit [:entries (-> (:entries db)
                         (mapv d/datafy)
@@ -94,7 +94,7 @@
 
 (f/reg-event-fx
  frame :nav
- [debug-event debug-fx]
+ []
  (fn [{:keys [db]} [_ idx k v]]
    (let [x (get-in db [:entries idx])
          ;; nav to next item in datafied object
@@ -110,7 +110,7 @@
 
 (f/reg-event-fx
  frame :clear
- [debug-event debug-fx]
+ []
  (fn [{:keys [db]} _]
    {:db (assoc db :entries [])}))
 
