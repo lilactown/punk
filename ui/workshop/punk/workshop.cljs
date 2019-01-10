@@ -2,12 +2,12 @@
   (:require [punk.ui.remote :as punk]
             [punk.ui.views.frisk]))
 
-(def app ""
-  "<div style=\"text-align: center; padding: 10px;\">foo bar</div>")
+;; (def app ""
+;;   "<div style=\"text-align: center; padding: 10px;\">foo bar</div>")
 
-(set! (-> js/document
-          (.-body)
-          (.-innerHTML)) app)
+;; (set! (-> js/document
+;;           (.-body)
+;;           (.-innerHTML)) app)
 
 (defn ^{:export true
         :dev/after-load true}

@@ -24,7 +24,7 @@
            (.on ws "message"
                 (fn message [m]
                   (punk/dispatch (edn/read-string m))))
-           (.on ws "close" (fn close [] (js/console.log "closed")))))
+           (.on ws "close" (fn close [] nil))))
 
     ;; setup the http server
     (.on http-server "upgrade"

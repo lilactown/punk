@@ -1,7 +1,8 @@
 (ns punk.ui.remote
   (:require [punk.ui.core :as core]
             [clojure.core.async :as a]
-            [cljs.tools.reader.edn :as edn]))
+            [cljs.tools.reader.edn :as edn]
+            [hx.react :as hx]))
 
 (defonce ^:dynamic *conn* (atom nil))
 
