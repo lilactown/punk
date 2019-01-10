@@ -17,7 +17,6 @@
     ;; setup the websocket
     (.on ws-server "connection"
          (fn connection [ws]
-           (js/console.log "opened")
            (f/reg-fx
             punk/frame :emit
             (fn emit [v]
@@ -45,8 +44,6 @@
 
 (defn stop []
   (.close @server))
-
-(println "hi2")
 
 (defn -main []
   (start))

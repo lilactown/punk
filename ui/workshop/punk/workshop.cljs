@@ -1,5 +1,5 @@
 (ns punk.workshop
-  (:require [punk.adapter.web]
+  (:require [punk.ui.remote :as punk]
             [punk.ui.views.frisk]))
 
 (def app ""
@@ -12,7 +12,7 @@
 (defn ^{:export true
         :dev/after-load true}
   start []
-  (punk.adapter.web/start))
+  (punk/start!))
 
 (tap> [{:foo ["bar" ['baz 1 2 3]]} {:asdf ["jkl" 1234 #{1 2 3} ['baz 1 2 3]]}])
 

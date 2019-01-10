@@ -385,6 +385,10 @@
         [:div {:style {:flex 1}}
          [Browser {:state state}]])]]))
 
+(defnc JustBrowser [_]
+  (let [state (<-deref ui-db)]
+    [Browser {:state state}]))
+
 (defn- external-handler [ev]
   (dispatch (edn/read-string ev)))
 
@@ -394,7 +398,6 @@
 (defn ^:export start! [node input output opts]
   {:pre [(not (nil? input))
          (not (nil? output))]}
-  (println "starting")
   (.addEventListener
    js/document "keydown"
    (fn [ev]
@@ -408,4 +411,9 @@
    ui-frame :emit
    (fn [v]
      (.put ^js output (pr-str v))))
-  (react-dom/render (hx/f [Drawer]) node))
+  (let [opts (edn/read-string opts)
+        drawer? (get opts :drawer? true)]
+    (println opts)
+    (react-dom/render (hx/f (if drawer?
+                              [Drawer]
+                              [JustBrowser])) node)))
