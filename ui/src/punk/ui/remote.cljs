@@ -47,7 +47,8 @@
         (.send conn ev)
         (recur)))
 
-    (swap! state merge {:conn conn})))
+    ;; (swap! state merge {:conn conn})
+    ))
 
 (defn close []
   (when (:conn @state)
