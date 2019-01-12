@@ -10,7 +10,8 @@
 ;;           (.-innerHTML)) app)
 
 (defn ^{:export true
-        :dev/after-load true}
+        ;; :dev/after-load true
+        }
   start []
   (punk/start!))
 

@@ -389,7 +389,7 @@
   (let [state (<-deref ui-db)]
     [Browser {:state state}]))
 
-(defn- external-handler [ev]
+(defn external-handler [ev]
   (dispatch (edn/read-string ev)))
 
 (defn drawer-toggler []
