@@ -53,6 +53,18 @@
               #(.removeEventListener js/window "mouseup" cb))
             [cb]))
 
+(defn <-new-window []
+  (let [win&container (<-state nil)]
+    (<-effect
+     (fn []
+       (let [ext-window (.open js/window "" "" "width=800,height=800,left=200,top=200")
+             container-el (-> ext-window .-document (.createElement "div"))]
+         (-> ext-window .-document .-body (.appendChild container-el))
+         (reset! win&container [ext-window container-el])
+         #(.close ext-window)))
+     [])
+    win&container))
+
 ;;
 ;; UI state
 ;;
@@ -232,8 +244,6 @@
        #js {:i "current" :x 0 :y 6 :w 12 :h 6}
        #js {:i "entries" :x 0 :y 12 :w 12 :h 6}])
 
-(def GridLayoutWithWidth (GridLayout/WidthProvider GridLayout))
-
 (defnc Browser [{:keys [state width]}]
   (let [next-views (-> (:views state)
                        (match-views (-> state :next :value)))
@@ -331,6 +341,19 @@
 
 (def dragging? (atom false))
 
+
+(defnc Popup [_]
+  (let [[win target] @(<-new-window)
+        state (<-deref ui-db)
+        win-size (<-window-size win)]
+    (when target
+      (react-dom/createPortal
+       (hx/f [Browser {:state state
+                       :width (- (:inner-width win-size) 15)}])
+       target))))
+
+(def BrowserWithWidth (GridLayout/WidthProvider Browser))
+
 (defnc Drawer [_]
   (let [state (<-deref ui-db)
         collapsed? (:collapsed? state)
@@ -387,34 +410,14 @@
         (if collapsed? ">>" "<<")]]
       (when (not collapsed?)
         [:div {:style {:flex 1}}
-         [Browser {:state state}]])]]))
+         [BrowserWithWidth {:state state
+                            :measureBeforeMount true}]])]]))
 
 (defnc JustBrowser [_]
   (let [state (<-deref ui-db)
         win-size (<-window-size)]
     [Browser {:state state :width (:inner-width win-size)}]))
 
-(defn <-new-window []
-  (let [win&container (<-state nil)]
-    (<-effect
-     (fn []
-       (let [ext-window (.open js/window "" "" "width=800,height=800,left=200,top=200")
-             container-el (-> ext-window .-document (.createElement "div"))]
-         (-> ext-window .-document .-body (.appendChild container-el))
-         (reset! win&container [ext-window container-el])
-         #(.close ext-window)))
-     [])
-    win&container))
-
-(defnc Popup [_]
-  (let [[win target] @(<-new-window)
-        state (<-deref ui-db)
-        win-size (<-window-size win)]
-    (when target
-      (react-dom/createPortal
-       (hx/f [Browser {:state state
-                       :width (- (:inner-width win-size) 15)}])
-       target))))
 
 (defn external-handler [ev]
   (dispatch (edn/read-string ev)))
@@ -441,5 +444,5 @@
   (let [opts (edn/read-string opts)
         drawer? (get opts :drawer? true)]
     (react-dom/render (hx/f (if drawer?
-                              [Popup]
+                              [Drawer]
                               [JustBrowser])) node)))
