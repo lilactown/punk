@@ -16,4 +16,6 @@
   :app {:target :browser
         :output-dir "target/out"
         ;;:asset-path "/js"
-        :modules {:main {:entries [punk.ui.core]}}}}}
+        :modules {:main {:entries [punk.ui.core]}
+                  :remote {:entries [punk.ui.remote]
+                           :depends-on #{:main}}}}}}
