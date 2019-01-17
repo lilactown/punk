@@ -45,10 +45,7 @@
     (a/go-loop []
       (let [ev (a/<! out-chan)]
         (.send conn ev)
-        (recur)))
-
-    ;; (swap! state merge {:conn conn})
-    ))
+        (recur)))))
 
 (defn close []
   (when (:conn @state)
@@ -71,6 +68,6 @@
                         (. new-container setAttribute "id" "connection")
                         (-> js/document .-body (.appendChild new-container))
                         new-container))]
-   (react-dom/render (hx/f [:<>
+    (react-dom/render (hx/f [:<>
                              [Connection]
                              [core/JustBrowser]]) container)))
