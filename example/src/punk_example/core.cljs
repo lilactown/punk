@@ -4,3 +4,5 @@
             [clojure.core.async :as a]))
 
 (punk/start)
+
+(tap> "foo")
