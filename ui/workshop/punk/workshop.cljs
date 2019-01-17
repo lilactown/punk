@@ -1,6 +1,5 @@
 (ns punk.workshop
-  (:require [punk.ui.remote :as punk]
-            [punk.ui.views.frisk]))
+  (:require [punk.adapter.web :as punk]))
 
 ;; (def app ""
 ;;   "<div style=\"text-align: center; padding: 10px;\">foo bar</div>")
@@ -10,10 +9,9 @@
 ;;           (.-innerHTML)) app)
 
 (defn ^{:export true
-        ;; :dev/after-load true
-        }
+        :dev/after-load true}
   start []
-  (punk/start!))
+  (punk/start))
 
 (tap> [{:foo ["bar" ['baz 1 2 3]]} {:asdf ["jkl" 1234 #{1 2 3} ['baz 1 2 3]]}])
 

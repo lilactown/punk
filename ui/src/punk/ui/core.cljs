@@ -17,26 +17,29 @@
 
 ;; Window-size hook based on https://github.com/rehooks/window-size/blob/master/index.js
 
-(defn get-size []
-  {:inner-height (.-innerHeight js/window)
-   :inner-width (.-innerWidth js/window)
-   :outer-height (.-outerHeight js/window)
-   :outer-width (.-outerWidth js/window)})
+(defn get-size [window]
+  {:inner-height (.-innerHeight window)
+   :inner-width (.-innerWidth window)
+   :outer-height (.-outerHeight window)
+   :outer-width (.-outerWidth window)})
 
-(defn <-window-size []
-  (let [window-size (<-state (get-size))
-        handle-resize #(reset! window-size (get-size))]
-    ;; Effect adds the event handler to the window resize event
-    (<-effect
-     (fn []
-       (.addEventListener js/window "resize" handle-resize)
-       ;; return the unsubscribe function
-       #(.removeEventListener js/window "resize" handle-resize))
-     ;; only re-sub on re-mount
-     [])
+(defn <-window-size
+  ([] (<-window-size js/window))
+  ([window]
+   (let [window-size (<-state (when window (get-size window)))
+         handle-resize #(reset! window-size (get-size window))]
+     ;; Effect adds the event handler to the window resize event
+     (<-effect
+      (fn []
+        (when window
+          (.addEventListener window "resize" handle-resize)
+          ;; return the unsubscribe function
+          #(.removeEventListener window "resize" handle-resize)))
+      ;; only re-sub on re-mount or new window val
+      #js [window])
 
-    ;; return value
-    @window-size))
+     ;; return value
+     @window-size)))
 
 (defn <-mouse-move [cb]
   (<-effect (fn []
@@ -231,7 +234,7 @@
 
 (def GridLayoutWithWidth (GridLayout/WidthProvider GridLayout))
 
-(defnc Browser [{:keys [state]}]
+(defnc Browser [{:keys [state width]}]
   (let [next-views (-> (:views state)
                        (match-views (-> state :next :value)))
 
@@ -278,11 +281,12 @@
            "}")
       "#entries .item { cursor: pointer; padding: 3px 0; margin: 3px 0; }"
       "#entries .item:hover { background-color: #eaeaea /*#44475a */; }"]
-     [GridLayoutWithWidth
+     [GridLayout
       {:class "layout"
        :layout layout
        :cols 12
        :rowHeight 30
+       :width width
        :draggableHandle ".titlebar"}
       ;; Next
       [:div {:key "next"}
@@ -320,7 +324,7 @@
           [pc/Table {:cols [[:id first {:flex 1}]
                             [:value (comp :value second) {:flex 11}]
                             ;; [:meta (comp :meta second) {:flex 5}]
-]
+                            ]
                      :on-entry-click (fn [_ entry]
                                        (dispatch [:punk.ui.browser/view-entry (second entry)]))
                      :data entries}])]]]]))
@@ -386,8 +390,31 @@
          [Browser {:state state}]])]]))
 
 (defnc JustBrowser [_]
-  (let [state (<-deref ui-db)]
-    [Browser {:state state}]))
+  (let [state (<-deref ui-db)
+        win-size (<-window-size)]
+    [Browser {:state state :width (:inner-width win-size)}]))
+
+(defn <-new-window []
+  (let [win&container (<-state nil)]
+    (<-effect
+     (fn []
+       (let [ext-window (.open js/window "" "" "width=800,height=800,left=200,top=200")
+             container-el (-> ext-window .-document (.createElement "div"))]
+         (-> ext-window .-document .-body (.appendChild container-el))
+         (reset! win&container [ext-window container-el])
+         #(.close ext-window)))
+     [])
+    win&container))
+
+(defnc Popup [_]
+  (let [[win target] @(<-new-window)
+        state (<-deref ui-db)
+        win-size (<-window-size win)]
+    (when target
+      (react-dom/createPortal
+       (hx/f [Browser {:state state
+                       :width (- (:inner-width win-size) 15)}])
+       target))))
 
 (defn external-handler [ev]
   (dispatch (edn/read-string ev)))
@@ -413,7 +440,6 @@
      (.put ^js output (pr-str v))))
   (let [opts (edn/read-string opts)
         drawer? (get opts :drawer? true)]
-    (println opts)
     (react-dom/render (hx/f (if drawer?
-                              [Drawer]
+                              [Popup]
                               [JustBrowser])) node)))
