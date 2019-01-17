@@ -342,10 +342,16 @@
 (def dragging? (atom false))
 
 
-(defnc Popup [_]
+(defnc Popup [{:keys [on-close]}]
   (let [[win target] @(<-new-window)
         state (<-deref ui-db)
         win-size (<-window-size win)]
+    (<-effect (fn []
+                (when win
+                  (.addEventListener win "unload"
+                                     on-close)
+                  #(.removeEventListener win "unload" on-close)))
+              #js [win])
     (when target
       (react-dom/createPortal
        (hx/f [Browser {:state state
@@ -354,15 +360,15 @@
 
 (def BrowserWithWidth (GridLayout/WidthProvider Browser))
 
-(defnc Drawer [_]
+(defnc DrawerRender [{:keys [on-pop-out]}]
   (let [state (<-deref ui-db)
         collapsed? (:collapsed? state)
         win-size (<-window-size)
         move-handler #(when @dragging?
-                          (dispatch
-                           [:punk.ui.drawer/change-width (* 100
-                                                            (/ (- (:inner-width win-size) (.. % -clientX))
-                                                               (:inner-width win-size)))]))]
+                        (dispatch
+                         [:punk.ui.drawer/change-width (* 100
+                                                          (/ (- (:inner-width win-size) (.. % -clientX))
+                                                             (:inner-width win-size)))]))]
     (<-mouse-move move-handler)
     (<-mouse-up #(reset! dragging? false))
     [:div {:style {:position "absolute"
@@ -385,7 +391,16 @@
       " cursor: pointer;"
       "}"
       "#punk__drawer-dragger { height: 100%; width: 3px; }"
-      "#punk__drawer-dragger:hover { cursor: col-resize; }"]
+      "#punk__drawer-dragger:hover { cursor: col-resize; }"
+      "#punk__pop-out-button {
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          padding: 10px;
+          background: #eee;
+          font-family: 'Source Sans Pro', sans-serif;
+       }"
+      "#punk__pop-out-button:hover { cursor: pointer; }"]
      [:div {:style {:display "flex"}}
       (when-not collapsed?
         [:div {:id "punk__drawer-dragger"
@@ -411,7 +426,16 @@
       (when (not collapsed?)
         [:div {:style {:flex 1}}
          [BrowserWithWidth {:state state
-                            :measureBeforeMount true}]])]]))
+                            :measureBeforeMount true}]
+         [:div {:id "punk__pop-out-button"
+                :on-click on-pop-out} "Pop out"]])]]))
+
+(defnc Drawer [_]
+  (let [pop-out? (<-state false)]
+    (if @pop-out?
+      [Popup {:on-close #(do (reset! pop-out? false)
+                             (println "closed"))}]
+      [DrawerRender {:on-pop-out #(reset! pop-out? true)}])))
 
 (defnc JustBrowser [_]
   (let [state (<-deref ui-db)
