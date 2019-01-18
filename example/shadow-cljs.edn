@@ -1,5 +1,6 @@
 ;; shadow-cljs configuration
-{:deps true
+{:source-paths ["src"]
+ :dependencies [[lilactown/punk-adapter-web "0.0.2-SNAPSHOT"]]
  :builds
  {:app {:target :browser
         :output-dir "public/app/js"

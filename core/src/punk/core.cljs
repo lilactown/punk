@@ -1,9 +1,8 @@
 (ns punk.core
   (:require [goog.object :as gobj]
             [clojure.string :as s]
-            [clojure.datafy :as d]
-            [clojure.core.protocols :as p]
             [frame.core :as f]
+            ;; [clojure.core.protocols :as p]
             ;; [clojure.datafy :as d]
             ))
 
