@@ -4,13 +4,20 @@
             [clojure.datafy :as d]
             [clojure.core.protocols :as p]
             [frame.core :as f]
-            [clojure.datafy :as d]))
+            ;; [clojure.datafy :as d]
+            ))
 
 (def dbg> (partial js/console.log "punk>"))
 
 ;;
 ;; Implement general protocols
 ;;
+
+;; Paceholders until cljs@next lands with clojure.datafy
+
+(defn datafy [x] x)
+
+(defn nav [_ _ x] x)
 
 (extend-protocol IPrintWithWriter
   js/Symbol
@@ -78,7 +85,7 @@
  (fn [{:keys [db]} [_ x]]
    (let [db' (update db :entries conj x)
          idx (count (:entries db))
-         dx (d/datafy x)]
+         dx (datafy x)]
      {:db db'
       :emit [:entry idx {:value dx
                          :meta (meta dx)}]})))
@@ -88,7 +95,7 @@
  []
  (fn [{:keys [db]} [_ x]]
    {:emit [:entries (-> (:entries db)
-                        (mapv d/datafy)
+                        (mapv datafy)
                         (mapv (fn [dx] {:value dx
                                         :meta (meta dx)})))]}))
 
@@ -98,11 +105,11 @@
  (fn [{:keys [db]} [_ idx k v]]
    (let [x (get-in db [:entries idx])
          ;; nav to next item in datafied object
-         x' (d/nav (d/datafy x) k v)
+         x' (nav (datafy x) k v)
          ;; store this nav'd value in db for reference later
          db' (update db :entries conj x')
          idx' (count (:entries db))
-         dx' (d/datafy x')]
+         dx' (datafy x')]
      {:db db'
       :emit [:nav idx {:value dx'
                        :meta (meta dx')
