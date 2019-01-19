@@ -332,7 +332,10 @@
        [pc/Pane {:title "Entries" :id "entries"}
         (let [entries (reverse (map-indexed vector (:entries state)))]
           [pc/Table {:cols [[:id first [:div {:style {:flex 1}}]]
-                            [:value (comp :value second) [:div {:style {:flex 11}}]]
+                            [:value (comp :value second) [:div {:style {:flex 11
+                                                                        :white-space "nowrap"
+                                                                        :overflow "hidden"
+                                                                        :text-overflow "ellipsis"}}]]
                             ;; [:meta (comp :meta second) {:flex 5}]
                             ]
                      :on-entry-click (fn [_ entry]
@@ -368,12 +371,13 @@
                         (dispatch
                          [:punk.ui.drawer/change-width (* 100
                                                           (/ (- (:inner-width win-size) (.. % -clientX))
-                                                             (:inner-width win-size)))]))]
+                                                             (:inner-width win-size)))]))
+        width (if collapsed? "20px" (/ (:inner-width win-size)
+                                       (/ 100 (:drawer-width state))))]
     (<-mouse-move move-handler)
     (<-mouse-up #(reset! dragging? false))
     [:div {:style {:position "absolute"
-                   :width (if collapsed? "20px" (/ (:inner-width win-size)
-                                                   (/ 100 (:drawer-width state))))
+                   :width width
                    :top 0
                    :bottom 0
                    :right 0
@@ -425,8 +429,9 @@
         (if collapsed? ">>" "<<")]]
       (when (not collapsed?)
         [:div {:style {:flex 1}}
-         [BrowserWithWidth {:state state
-                            :measureBeforeMount true}]
+         [Browser {:state state
+                   :width (- width 25)
+                   :measureBeforeMount true}]
          [:div {:id "punk__pop-out-button"
                 :on-click on-pop-out} "Pop out"]])]]))
 
