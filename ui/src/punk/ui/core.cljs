@@ -331,8 +331,8 @@
       [:div {:key "entries"}
        [pc/Pane {:title "Entries" :id "entries"}
         (let [entries (reverse (map-indexed vector (:entries state)))]
-          [pc/Table {:cols [[:id first {:flex 1}]
-                            [:value (comp :value second) {:flex 11}]
+          [pc/Table {:cols [[:id first [:div {:style {:flex 1}}]]
+                            [:value (comp :value second) [:div {:style {:flex 11}}]]
                             ;; [:meta (comp :meta second) {:flex 5}]
                             ]
                      :on-entry-click (fn [_ entry]

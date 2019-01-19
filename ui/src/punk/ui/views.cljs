@@ -4,8 +4,8 @@
 
 (defnc MapView [{:keys [data nav] :as props}]
   [pc/Table (merge props
-                   {:cols [[:key first {:flex 1}]
-                           [:value second {:flex 3}]]
+                   {:cols [[:key first [:div {:style {:flex 1}}]]
+                           [:value second [:div {:style {:flex 3}}]]]
                     :on-entry-click (fn [key] (nav data key (get data key)))
                     :data data}
                    ;; remove nav from props
@@ -13,15 +13,15 @@
 
 (defnc CollView [{:keys [data nav] :as props}]
   [pc/Table (merge props
-                   {:cols [[:idx first {:flex 1}]
-                           [:value second {:flex 11}]]
+                   {:cols [[:idx first [:div {:style {:flex 1}}]]
+                           [:value second [:div {:style {:flex 11}}]]]
                     :on-entry-click (fn [key] (nav data key (get data key)))
                     :data (map-indexed vector data)}
                    {:nav nil})])
 
 (defnc SetView [{:keys [data nav] :as props}]
   [pc/Table (merge props
-                   {:cols [[:value identity]]
+                   {:cols [[:value identity [:div]]]
                     :on-entry-click (fn [v] (nav data nil v))
                     :data data}
                    {:nav nil})])
