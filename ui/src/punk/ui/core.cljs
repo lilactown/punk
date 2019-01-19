@@ -76,6 +76,9 @@
                       :next nil
                       :collapsed? true
                       :drawer-width 50
+                      :grid-layout #js [#js {:i "next" :x 0 :y 0 :w 12 :h 6}
+                                        #js {:i "current" :x 0 :y 6 :w 12 :h 6}
+                                        #js {:i "entries" :x 0 :y 12 :w 12 :h 6}]
                       :views [{:id :punk.view/nil
                                :match nil?
                                :view nil}
@@ -201,6 +204,11 @@
      {:db (assoc db :views views')})))
 
 (f/reg-event-fx
+ ui-frame :punk.ui.browser/change-layout []
+ (fn [{:keys [db]} [_ layout]]
+   {:db (assoc db :grid-layout layout)}))
+
+(f/reg-event-fx
  ui-frame :punk.ui.drawer/change-width []
  (fn [{:keys [db]} [_ width]]
    {:db (assoc db :drawer-width width)}))
@@ -253,7 +261,8 @@
                     (first next-views))
         current-view (-> (:views state)
                          (match-views (-> state :current :value))
-                         (first))]
+                         (first))
+        update-layout #(dispatch [:punk.ui.browser/change-layout %])]
     [:div {:style {:height "100%"}
            :id "punk-container"}
      [pc/Style
@@ -293,7 +302,8 @@
       "#entries .item:hover { background-color: #eaeaea /*#44475a */; }"]
      [GridLayout
       {:class "layout"
-       :layout layout
+       :layout (:grid-layout state)
+       :onLayoutChange update-layout
        :cols 12
        :rowHeight 30
        :width width
