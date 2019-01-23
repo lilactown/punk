@@ -247,11 +247,6 @@
 ;; Browser panes
 ;;
 
-(def layout
-  #js [#js {:i "next" :x 0 :y 0 :w 12 :h 6}
-       #js {:i "current" :x 0 :y 6 :w 12 :h 6}
-       #js {:i "entries" :x 0 :y 12 :w 12 :h 6}])
-
 (defnc Browser [{:keys [state width]}]
   (let [next-views (-> (:views state)
                        (match-views (-> state :next :value)))
@@ -354,7 +349,6 @@
 
 (def dragging? (atom false))
 
-
 (defnc Popup [{:keys [on-close]}]
   (let [[win target] @(<-new-window)
         state (<-deref ui-db)
@@ -370,8 +364,6 @@
        (hx/f [Browser {:state state
                        :width (- (:inner-width win-size) 15)}])
        target))))
-
-(def BrowserWithWidth (GridLayout/WidthProvider Browser))
 
 (defnc DrawerRender [{:keys [on-pop-out]}]
   (let [state (<-deref ui-db)
