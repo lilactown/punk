@@ -13,6 +13,15 @@
                         :http-port    8700
                         :preloads     [devtools.preload]}}
 
+  :release-test {:target :browser
+                 :output-dir "public/release-test/js"
+                 :asset-path "/js"
+                 :modules {:main {:entries [punk.release-test]}}
+                 :devtools {:http-root    "public/release-test"
+                            :http-port    8701
+                            :preloads     [devtools.preload
+                                           punk.adapter.web.preload]}}
+
   :app {:target :browser
         :output-dir "target/out"
         ;;:asset-path "/js"

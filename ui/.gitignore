@@ -3,4 +3,5 @@ node_modules
 .cpcache/
 .nrepl-port
 */workshop/js
+public/release-test/js
 /target/
