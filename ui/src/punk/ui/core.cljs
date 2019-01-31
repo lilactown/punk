@@ -53,12 +53,19 @@
               #(.removeEventListener js/window "mouseup" cb))
             [cb]))
 
-(defn <-new-window []
+(defn <-new-window [{:keys [ui/css]}]
   (let [win&container (<-state nil)]
     (<-effect
      (fn []
        (let [ext-window (.open js/window "" "" "width=800,height=800,left=200,top=200")
              container-el (-> ext-window .-document (.createElement "div"))]
+         (when css
+           (doseq [sheet css]
+             (let [link-tag (. js/document createElement "link")]
+               (. link-tag setAttribute "rel" "stylesheet")
+               (. link-tag setAttribute "type" "text/css")
+               (. link-tag setAttribute "href" sheet)
+               (-> ext-window .-document .-body (.appendChild link-tag)))))
          (-> ext-window .-document .-body (.appendChild container-el))
          (reset! win&container [ext-window container-el])
          #(.close ext-window)))
@@ -349,8 +356,8 @@
 
 (def dragging? (atom false))
 
-(defnc Popup [{:keys [on-close]}]
-  (let [[win target] @(<-new-window)
+(defnc Popup [{:keys [on-close opts]}]
+  (let [[win target] @(<-new-window opts)
         state (<-deref ui-db)
         win-size (<-window-size win)]
     (<-effect (fn []
@@ -371,9 +378,10 @@
         win-size (<-window-size)
         move-handler #(when @dragging?
                         (dispatch
-                         [:punk.ui.drawer/change-width (* 100
-                                                          (/ (- (:inner-width win-size) (.. % -clientX))
-                                                             (:inner-width win-size)))]))
+                         [:punk.ui.drawer/change-width
+                          (* 100
+                             (/ (- (:inner-width win-size) (.. % -clientX))
+                                (:inner-width win-size)))]))
         width (if collapsed? "20px" (/ (:inner-width win-size)
                                        (/ 100 (:drawer-width state))))]
     (<-mouse-move move-handler)
@@ -437,11 +445,11 @@
          [:div {:id "punk__pop-out-button"
                 :on-click on-pop-out} "Pop out"]])]]))
 
-(defnc Drawer [_]
+(defnc Drawer [{:keys [opts]}]
   (let [pop-out? (<-state false)]
     (if @pop-out?
-      [Popup {:on-close #(do (reset! pop-out? false)
-                             (println "closed"))}]
+      [Popup {:on-close #(do (reset! pop-out? false))
+              :opts opts}]
       [DrawerRender {:on-pop-out #(reset! pop-out? true)}])))
 
 (defnc JustBrowser [_]
@@ -475,5 +483,5 @@
   (let [opts (edn/read-string opts)
         drawer? (get opts :drawer? true)]
     (react-dom/render (hx/f (if drawer?
-                              [Drawer]
-                              [JustBrowser])) node)))
+                              [Drawer {:opts opts}]
+                              [JustBrowser {:opts opts}])) node)))

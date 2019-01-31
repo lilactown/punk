@@ -1,5 +1,5 @@
 (ns punk.workshop
-  (:require [punk.adapter.web :as punk]))
+  (:require [punk.adapter.web :as adapter]))
 
 ;; (def app ""
 ;;   "<div style=\"text-align: center; padding: 10px;\">foo bar</div>")
@@ -11,7 +11,13 @@
 (defn ^{:export true
         :dev/after-load true}
   start []
-  (punk/start))
+  (println "starting!")
+  (let [opts {:ui/script ""
+              :ui/css ["https://fonts.googleapis.com/css?family=Source+Sans+Pro"
+                       "http://localhost:8700/grid-layout.css"
+                       "http://localhost:8700/resizable.css"]}]
+    (adapter/start opts) ;; creates DOM nodes
+    (adapter/start-ui! opts)))
 
 (tap> [{:foo ["bar" ['baz 1 2 3]]} {:asdf ["jkl" 1234 #{1 2 3} ['baz 1 2 3]]}])
 

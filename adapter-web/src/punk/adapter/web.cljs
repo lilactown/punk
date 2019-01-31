@@ -48,11 +48,12 @@
 ;;
 
 (def default-script
-  "https://github.com/Lokeh/punk/releases/download/0.0.2-alpha.2/punk.js")
+  "https://cdn.jsdelivr.net/gh/Lokeh/punk@0.0.2-alpha.3/ui/dist/js/main.js")
 
 (def default-css
-  ["https://github.com/Lokeh/punk/releases/download/0.0.2-alpha.2/resizable.css"
-   "https://github.com/Lokeh/punk/releases/download/0.0.2-alpha.2/grid-layout.css"])
+  ["https://fonts.googleapis.com/css?family=Source+Sans+Pro"
+   "https://cdn.jsdelivr.net/gh/Lokeh/punk@0.0.2-alpha.3/ui/dist/css/grid-layout.css"
+   "https://cdn.jsdelivr.net/gh/Lokeh/punk@0.0.2-alpha.3/ui/dist/css/resizable.css"])
 
 (defn ^{:export true}
   start
