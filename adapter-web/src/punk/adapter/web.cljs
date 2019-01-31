@@ -30,23 +30,60 @@
  (fn [v]
    (a/put! in-chan (pr-str v))))
 
-(def start-ui!
-  (gobj/getValueByKeys js/window "punk" "ui" "core" "start_BANG_"))
-
 (def in-stream #js {:subscribe #(swap! subscribers conj %)
                     :unsubscribe #(swap! subscribers disj %)})
 
 (def out-stream #js {:put (fn [v] (a/put! out-chan v))})
 
+(defn start-ui! [opts]
+  (let [start! (gobj/getValueByKeys js/window "punk" "ui" "core" "start_BANG_")
+        container (. js/document getElementById "punk")]
+    (punk/remove-taps!) 
+    (punk/add-taps!) 
+    (start! container in-stream out-stream (pr-str opts))))
+
+
+;;
+;; ---- Defaults ----
+;;
+
+(def default-script
+  "https://github.com/Lokeh/punk/releases/download/0.0.2-alpha.2/punk.js")
+
+(def default-css
+  ["https://github.com/Lokeh/punk/releases/download/0.0.2-alpha.2/resizable.css"
+   "https://github.com/Lokeh/punk/releases/download/0.0.2-alpha.2/grid-layout.css"])
+
 (defn ^{:export true}
   start
   ([] (start nil))
   ([opts]
-   (let [container (or (. js/document getElementById "punk")
-                       (let [new-container (. js/document createElement "div")]
-                         (. new-container setAttribute "id" "punk")
-                         (-> js/document .-body (.appendChild new-container))
-                         new-container))]
-     (punk/remove-taps!)
-     (punk/add-taps!)
-     (start-ui! container in-stream out-stream (pr-str opts)))))
+   (let [{:keys [ui/script ui/css]
+          :or {script default-script css default-css}} opts]
+     (if (. js/document getElementById "punk")
+       (start-ui! opts)
+
+       ;; first time running
+       (let [new-container (. js/document createElement "div")
+             script-tag (. js/document createElement "script")]
+
+         ;; script tag
+         (. script-tag setAttribute "src" script)
+
+         (set! (.-onload ^js script-tag)
+               (fn []
+                 (start-ui! opts)))
+         (-> js/document .-body (.appendChild script-tag))
+
+         ;; css
+         (doseq [sheet css]
+           (let [link-tag (. js/document createElement "link")]
+             (. link-tag setAttribute "rel" "stylesheet")
+             (. link-tag setAttribute "type" "text/css")
+             (. link-tag setAttribute "href" sheet)
+             (-> js/document .-body (.appendChild link-tag))))
+
+         ;; container
+         (. new-container setAttribute "id" "punk")
+         (-> js/document .-body (.appendChild new-container))
+         new-container)))))
