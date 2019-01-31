@@ -23,7 +23,7 @@
                                            punk.adapter.web.preload]}}
 
   :app {:target :browser
-        :output-dir "target/out"
+        :output-dir "dist/js"
         ;;:asset-path "/js"
         :modules {:main {:entries [punk.ui.core]}
                   :remote {:entries [punk.ui.remote]
