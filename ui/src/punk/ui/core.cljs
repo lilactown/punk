@@ -391,8 +391,7 @@
                    :top 0
                    :bottom 0
                    :right 0
-                   :z-index 10
-                   }}
+                   :z-index 99999}}
      [pc/Style
       "#punk__drawer-toggle {"
       " background: #f3f3f3;"
