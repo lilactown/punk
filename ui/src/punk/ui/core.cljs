@@ -61,6 +61,7 @@
              container-el (-> ext-window .-document (.createElement "div"))]
          (when css
            (doseq [sheet css]
+             (println "adding sheet")
              (let [link-tag (. js/document createElement "link")]
                (. link-tag setAttribute "rel" "stylesheet")
                (. link-tag setAttribute "type" "text/css")

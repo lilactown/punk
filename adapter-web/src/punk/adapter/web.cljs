@@ -38,8 +38,8 @@
 (defn start-ui! [opts]
   (let [start! (gobj/getValueByKeys js/window "punk" "ui" "core" "start_BANG_")
         container (. js/document getElementById "punk")]
-    (punk/remove-taps!) 
-    (punk/add-taps!) 
+    (punk/remove-taps!)
+    (punk/add-taps!)
     (start! container in-stream out-stream (pr-str opts))))
 
 
@@ -48,12 +48,12 @@
 ;;
 
 (def default-script
-  "https://cdn.jsdelivr.net/gh/Lokeh/punk@0.0.2-alpha.3/ui/dist/js/main.js")
+  "https://cdn.jsdelivr.net/gh/Lokeh/punk@0.0.2-alpha.5/ui/dist/js/main.js")
 
 (def default-css
   ["https://fonts.googleapis.com/css?family=Source+Sans+Pro"
-   "https://cdn.jsdelivr.net/gh/Lokeh/punk@0.0.2-alpha.3/ui/dist/css/grid-layout.css"
-   "https://cdn.jsdelivr.net/gh/Lokeh/punk@0.0.2-alpha.3/ui/dist/css/resizable.css"])
+   "https://cdn.jsdelivr.net/gh/Lokeh/punk@0.0.2-alpha.5/ui/dist/css/grid-layout.css"
+   "https://cdn.jsdelivr.net/gh/Lokeh/punk@0.0.2-alpha.5/ui/dist/css/resizable.css"])
 
 (defn ^{:export true}
   start
