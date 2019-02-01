@@ -59,7 +59,6 @@
      (fn []
        (let [ext-window (.open js/window "" "" "width=800,height=800,left=200,top=200")
              container-el (-> ext-window .-document (.createElement "div"))]
-         (println css)
          (when css
            (doseq [sheet css]
              (let [link-tag (. js/document createElement "link")]

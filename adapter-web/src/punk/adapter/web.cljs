@@ -48,21 +48,25 @@
 ;;
 
 (def default-script
-  "https://cdn.jsdelivr.net/gh/Lokeh/punk@0.0.2-alpha.5/ui/dist/js/main.js")
+  "https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.6/ui/dist/js/main.js"
+  ;; "http://localhost:8701/main.js"
+  )
 
 (def default-css
   ["https://fonts.googleapis.com/css?family=Source+Sans+Pro"
-   "https://cdn.jsdelivr.net/gh/Lokeh/punk@0.0.2-alpha.5/ui/dist/css/grid-layout.css"
-   "https://cdn.jsdelivr.net/gh/Lokeh/punk@0.0.2-alpha.5/ui/dist/css/resizable.css"])
+   "https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.6/ui/dist/css/grid-layout.css"
+   "https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.6/ui/dist/css/resizable.css"])
 
 (defn ^{:export true}
   start
   ([] (start nil))
   ([opts]
-   (let [{:keys [ui/script ui/css]
-          :or {script default-script css default-css}} opts]
+   (let [default-opts {:ui/script default-script
+                       :ui/css default-css}
+         opts-with-defaults (merge default-opts opts)
+         {:keys [ui/script ui/css]} opts-with-defaults]
      (if (. js/document getElementById "punk")
-       (start-ui! opts)
+       (start-ui! opts-with-defaults)
 
        ;; first time running
        (let [new-container (. js/document createElement "div")
@@ -73,7 +77,7 @@
 
          (set! (.-onload ^js script-tag)
                (fn []
-                 (start-ui! opts)))
+                 (start-ui! opts-with-defaults)))
          (-> js/document .-body (.appendChild script-tag))
 
          ;; css
