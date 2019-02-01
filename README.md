@@ -1,20 +1,20 @@
 # Punk
 
-A [REBL-like](https://www.youtube.com/watch?v=c52QhiXsmyI) data browser built
-for the web.
+Punk is a [REBL-like](https://www.youtube.com/watch?v=c52QhiXsmyI) data browser
+built for the web.
 
 ![how to browser](./punk-1.gif)
 
 ## Usage
 
-punk is built with a client-server architecture in order to support different 
+Punk is built with a client-server architecture in order to support different 
 kinds of environments you might want to send values from.
 
 When in a web browser, it passes messages directly back and forth between your
 application and the UI. When in a server context (e.g. Node.js), it communicates
 via websockets.
 
-For each platform, there is a punk `adapter` library which sets up the necessary 
+For each platform, there is a Punk `adapter` library which sets up the necessary 
 plumbing to allow your application to communicate to the UI application.
 
 ### Browser
@@ -33,7 +33,7 @@ namespace:
         :devtools {:preloads [punk.adapter.web.preload]}}
 ```
 
-Now, load your app in the browser; punk's drawer should be on the right hand 
+Now, load your app in the browser; Punk's drawer should be on the right hand 
 side. Clicking the drawer or pressing the hot key `Ctrl-Alt-P` should expand the
 UI.
 
@@ -55,12 +55,12 @@ namespace:
 ```
 
 The Node.js adapter automatically starts a web server at [http://localhost:9876](http://localhost:9876).
-Navigate there to see the the punk UI.
+Navigate there to see the the Punk UI.
 
 ### Browsing data
 
-By default, punk adds a listener to values emitted by `tap>`. To inspect a value,
-simply use the `tap>` function to send it to the punk application. 
+By default, Punk adds a listener to values emitted by `tap>`. To inspect a value,
+simply use the `tap>` function to send it to the Punk application. 
 
 
 ## Issues
