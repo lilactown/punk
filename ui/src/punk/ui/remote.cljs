@@ -61,7 +61,7 @@
                    :padding "10px"}}
      (prn-str state)]))
 
-(defn start! []
+(defn ^:export start! []
   (println "Starting!")
   (let [container (or (. js/document getElementById "connection")
                       (let [new-container (. js/document createElement "div")]
