@@ -395,7 +395,6 @@
      [pc/Style
       "#punk__drawer-toggle {"
       " background: #f3f3f3;"
-      " height: 100%;"
       " width: 20px;"
       " position: relative;"
       " border: 1px solid #eee;"
@@ -408,7 +407,6 @@
       "#punk__drawer-dragger:hover { cursor: col-resize; }"
       "#punk__pop-out-button {
           position: absolute;
-          bottom: 0;
           right: 0;
           padding: 10px;
           background: #eee;
