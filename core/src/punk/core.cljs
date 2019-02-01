@@ -2,9 +2,8 @@
   (:require [goog.object :as gobj]
             [clojure.string :as s]
             [frame.core :as f]
-            ;; [clojure.core.protocols :as p]
-            ;; [clojure.datafy :as d]
-            ))
+            [clojure.core.protocols :as p]
+            [clojure.datafy :as d]))
 
 (def dbg> (partial js/console.log "punk>"))
 
@@ -12,11 +11,9 @@
 ;; Implement general protocols
 ;;
 
-;; Paceholders until cljs@next lands with clojure.datafy
+(defn datafy [x] d/datafy)
 
-(defn datafy [x] x)
-
-(defn nav [_ _ x] x)
+(defn nav [_ _ x] d/nav)
 
 (extend-protocol IPrintWithWriter
   js/Symbol
