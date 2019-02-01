@@ -386,15 +386,17 @@
                                        (/ 100 (:drawer-width state))))]
     (<-mouse-move move-handler)
     (<-mouse-up #(reset! dragging? false))
-    [:div {:style {:position "absolute"
+    [:div {:style {:position "fixed"
                    :width width
                    :top 0
                    :bottom 0
                    :right 0
-                   :z-index 10}}
+                   :z-index 10
+                   }}
      [pc/Style
       "#punk__drawer-toggle {"
       " background: #f3f3f3;"
+      " height: 100%;"
       " width: 20px;"
       " position: relative;"
       " border: 1px solid #eee;"
@@ -407,6 +409,7 @@
       "#punk__drawer-dragger:hover { cursor: col-resize; }"
       "#punk__pop-out-button {
           position: absolute;
+          bottom: 0;
           right: 0;
           padding: 10px;
           background: #eee;
@@ -436,7 +439,8 @@
                       :font-size "10px"}}
         (if collapsed? ">>" "<<")]]
       (when (not collapsed?)
-        [:div {:style {:flex 1}}
+        [:div {:style {:flex 1
+                       :overflow "scroll"}}
          [Browser {:state state
                    :width (- width 25)
                    :measureBeforeMount true}]
