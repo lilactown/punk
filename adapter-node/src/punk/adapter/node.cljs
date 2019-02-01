@@ -8,8 +8,42 @@
 
 (defonce server (atom #js {:close (fn [])}))
 
+(def default-script
+  ["https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.8/ui/dist/js/main.js"
+   "https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.8/ui/dist/js/remote.js"]
+  ;; "http://localhost:8701/main.js"
+  )
+
+(def default-css
+  ["https://fonts.googleapis.com/css?family=Source+Sans+Pro"
+   "https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.8/ui/dist/css/grid-layout.css"
+   "https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.8/ui/dist/css/resizable.css"])
+
+(defn css-tag [href]
+  (str "<link href=\"" href "\" rel=\"stylesheet\" />"))
+
+(defn script-tag [src]
+  (str "<script src=\"" src "\" type=\"text/javascript\"></script>"))
+
+(def page
+  (str "<html>"
+       " <head>"
+       (apply str
+              (map css-tag default-css))
+       " </head>"
+       "<body>"
+       (apply str (map script-tag default-script))
+       "  <script>punk.ui.remote.start_BANG_()</script>"
+       "</body>"
+       "</html>"))
+
+(defn handler [req res]
+  (.end
+   res
+   page))
+
 (defn start []
-  (let [http-server (.createServer http)
+  (let [http-server (.createServer http handler)
         ws-server (ws/Server. #js {:noServer true})]
     (punk/remove-taps!)
     (punk/add-taps!)
@@ -44,9 +78,6 @@
 
 (defn stop []
   (.close @server))
-
-(defn -main []
-  (start))
 
 #_(stop)
 #_(start)

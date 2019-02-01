@@ -1,6 +1,5 @@
-{:paths ["src"]
+{:paths ["src" "example"]
  :deps {punk/core {:local/root "../core"}}
  :aliases
  {:dev
-  {:extra-deps {org.clojure/clojurescript {:git/url "https://github.com/clojure/clojurescript.git"
-                                           :sha "82c10925eb8d9c3cecf23447ddf4e1342f120b69"}}}}}
+  {:extra-deps {org.clojure/clojurescript {:mvn/version "1.10.516"}}}}}
