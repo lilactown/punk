@@ -11,9 +11,9 @@
 ;; Implement general protocols
 ;;
 
-(defn datafy [x] d/datafy)
+(def datafy d/datafy)
 
-(defn nav [_ _ x] d/nav)
+(def nav d/nav)
 
 (extend-protocol IPrintWithWriter
   js/Symbol
