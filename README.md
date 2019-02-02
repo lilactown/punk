@@ -3,6 +3,12 @@
 Punk is a [REBL-like](https://www.youtube.com/watch?v=c52QhiXsmyI) data browser
 built for the web.
 
+- [Usage](#usage)
+- [How it works](#how-it-works)
+- [Installation](#installation)
+- [Issues](#issues)
+- [Feature requests](#feature-requests)
+
 <img src="/screenshot.png" alt="screenshot" width="600">
 
 ## Usage
