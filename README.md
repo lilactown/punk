@@ -8,11 +8,11 @@ built for the web.
 ## Usage
 
 By default, Punk adds a listener to values emitted by `tap>`. To inspect a value,
-simply use the `tap>` function to send it to the Punk application. 
+simply use the `tap>` function to send it to the Punk UI. 
 
 While your application is running, you will be able to view the Punk UI
-application either embedded on the webpage (browser) or on a web server started
-on your localhost (Node.js).
+either embedded on the webpage (browser) or on a web server started on your
+localhost (Node.js).
 
 There are 3 *panes* that will appear in the Punk UI:
 
@@ -42,8 +42,8 @@ environments your projects might run in.
 
 The Punk `core` library is what handles calling `datafy` and `nav` on values, 
 and must live in your application in order to work correctly. However, the UI 
-can live completely separate from your application code, which means that it's
-much lighter weight in terms of dependencies.
+can live completely separate from your application code, which means that the 
+whole package is much lighter weight in terms of dependencies.
 
 When in a web browser, it passes messages directly between your application and 
 the UI via `core.async`. When in a server context (e.g. Node.js), it 
