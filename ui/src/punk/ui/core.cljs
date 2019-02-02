@@ -162,6 +162,7 @@
                :current x
                :next nil
                :next/loading false
+               :current.view/selected nil
                :history [])}))
 
 (f/reg-event-fx
@@ -172,6 +173,8 @@
             (assoc
              :current (:next db)
              :next.view/key nil
+             :next.view/selected nil
+             :current.view/selected nil
              :next nil)
             (update
              :history
@@ -186,7 +189,8 @@
             (update :history pop)
             (assoc :current (-> db :history peek)
                    :next nil
-                   :next.view/selected nil))}))
+                   :next.view/selected nil
+                   :current.view/selected nil))}))
 
 (f/reg-event-fx
  ui-frame :punk.ui.browser/history-nth
@@ -198,7 +202,8 @@
                    :current current
                    :next nil
                    :next/key (:nav-key current)
-                   :next.view/selected nil))})
+                   :next.view/selected nil
+                   :current.view/selected nil))})
    ))
 
 (f/reg-event-fx
@@ -576,4 +581,4 @@
                               [Drawer {:opts opts}]
                               [JustBrowser {:opts opts}])) node)))
 
-#_(tap> (:history @ui-db))
+#_(console.log @ui-db)

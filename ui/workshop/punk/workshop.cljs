@@ -1,5 +1,6 @@
 (ns punk.workshop
-  (:require [punk.adapter.web :as adapter]))
+  (:require [punk.adapter.web :as adapter]
+            [punk.ui.views.frisk]))
 
 ;; (def app ""
 ;;   "<div style=\"text-align: center; padding: 10px;\">foo bar</div>")
