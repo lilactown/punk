@@ -9,15 +9,15 @@
 (defonce server (atom #js {:close (fn [])}))
 
 (def default-script
-  ["https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.8/ui/dist/js/main.js"
-   "https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.8/ui/dist/js/remote.js"]
+  ["https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.10/ui/dist/js/main.js"
+   "https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.10/ui/dist/js/remote.js"]
   ;; "http://localhost:8701/main.js"
   )
 
 (def default-css
   ["https://fonts.googleapis.com/css?family=Source+Sans+Pro"
-   "https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.8/ui/dist/css/grid-layout.css"
-   "https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.8/ui/dist/css/resizable.css"])
+   "https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.10/ui/dist/css/grid-layout.css"
+   "https://cdn.jsdelivr.net/gh/Lokeh/punk@v0.0.2-alpha.10/ui/dist/css/resizable.css"])
 
 (defn css-tag [href]
   (str "<link href=\"" href "\" rel=\"stylesheet\" />"))

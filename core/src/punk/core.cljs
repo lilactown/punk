@@ -3,7 +3,8 @@
             [clojure.string :as s]
             [frame.core :as f]
             [clojure.core.protocols :as p]
-            [clojure.datafy :as d]))
+            [clojure.datafy :as d]
+            [cljs.repl :as repl]))
 
 (def dbg> (partial js/console.log "punk>"))
 
@@ -30,7 +31,8 @@
     ;;                           "clojure$core$protocols$Datafiable$"
     ;;                           "clojure$core$protocols$Datafiable$datafy$arity$1")))
     ;;     x)
-
+    (instance? js/Error x)
+    (repl/Error->map x)
     :else x))
 
 ;;
