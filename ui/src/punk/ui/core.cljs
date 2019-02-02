@@ -108,6 +108,7 @@
                               {:id :punk.view/edn
                                :match any?
                                :view #'views/EdnView}]
+                      :next.view/key nil
                       :current.view/selected nil
                       :next.view/selected nil}))
 
@@ -170,10 +171,12 @@
    {:db (-> db
             (assoc
              :current (:next db)
+             :next.view/key nil
              :next nil)
             (update
              :history
-             conj (:current db)))}))
+             conj (assoc (:current db)
+                         :nav-key (:next.view/key db))))}))
 
 (f/reg-event-fx
  ui-frame :punk.ui.browser/history-back
@@ -186,10 +189,25 @@
                    :next.view/selected nil))}))
 
 (f/reg-event-fx
+ ui-frame :punk.ui.browser/history-nth
+ [#_debug-db #_debug-event]
+ (fn [{:keys [db]} [_ idx]]
+   (let [current (nth (:history db) idx)]
+   {:db (-> db
+            (assoc :history (vec (take idx (:history db)))
+                   :current current
+                   :next nil
+                   :next/key (:nav-key current)
+                   :next.view/selected nil))})
+   ))
+
+(f/reg-event-fx
  ui-frame :punk.ui.browser/nav-to
  [#_debug-db #_debug-event]
  (fn [{:keys [db]} [_ idx k v]]
-   {:db (assoc db :next/loading true)
+   {:db (assoc db
+               :next/loading true
+               :next.view/key k)
     :emit [:nav idx k v]}))
 
 (f/reg-event-fx
@@ -278,20 +296,32 @@
       :nav #(dispatch [:punk.ui.browser/view-next])}]]])
 
 (defnc Current [{:keys [history view views current]}]
-  [pc/Pane {:title "Current"
-            :id "current"
-            :controls [:div
-                       [:select {:value (str (:id view))
-                                 :on-change #(dispatch [:punk.ui.browser/select-current-view
-                                                        (keyword (subs (.. % -target -value) 1))])}
-                        (for [vid (map (comp str :id) views)]
-                          [:option {:key vid} vid])]
-                       [:button {:type "button"
-                                 :style {:width "60px"
-                                         :margin-left "10px"
-                                         :margin-right "5px"}
-                                 :disabled (empty? history)
-                                 :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]]}
+  [pc/Pane
+   {:title "Current"
+    :id "current"
+    :controls [:div
+               [:select {:value (str (:id view))
+                         :on-change #(dispatch [:punk.ui.browser/select-current-view
+                                                (keyword (subs (.. % -target -value) 1))])}
+                (for [vid (map (comp str :id) views)]
+                  [:option {:key vid} vid])]
+               [:button {:type "button"
+                         :style {:width "60px"
+                                 :margin-left "10px"
+                                 :margin-right "5px"}
+                         :disabled (empty? history)
+                         :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]
+               (->> history
+                    (map :nav-key)
+                    (map-indexed
+                     (fn [i k] [:<>
+                                [:a {:href "#"
+                                     :on-click #(do (.preventDefault %)
+                                                    (dispatch [:punk.ui.browser/history-nth i]))
+                                     :style {:padding-left "3px"
+                                             :padding-right "3px"
+                                             :margin-left "3px"
+                                             :margin-right "3px"}} (str k)]])))]}
    [:div {:style {:display "flex"
                   :flex-direction "column"}}
     [(:view view)
@@ -512,9 +542,9 @@
      (when (and (.-ctrlKey ev) (.-altKey ev) (= "KeyP" (.-code ev)))
        (drawer-toggler))))
   (.unsubscribe ^js input
-                external-handler)
+                #'external-handler)
   (.subscribe ^js input
-              external-handler)
+              #'external-handler)
   (f/reg-fx
    ui-frame :emit
    (fn [v]
@@ -524,3 +554,5 @@
     (react-dom/render (hx/f (if drawer?
                               [Drawer {:opts opts}]
                               [JustBrowser {:opts opts}])) node)))
+
+#_(tap> (:history @ui-db))
