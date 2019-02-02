@@ -29,7 +29,7 @@
     [:div {:style {:padding "8px"}}
      children]]
    (when controls
-     [:div {:style {:padding "3px 8px"
+     [:div {:style {:padding "5px 8px"
                     :background "#eee"}}
       controls])])
 

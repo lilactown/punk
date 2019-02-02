@@ -108,7 +108,8 @@
                               {:id :punk.view/edn
                                :match any?
                                :view #'views/EdnView}]
-                      :view/selected nil}))
+                      :current.view/selected nil
+                      :next.view/selected nil}))
 
 (defonce ui-frame (f/create-frame
                    (f/inject-cofx :db)))
@@ -182,7 +183,7 @@
             (update :history pop)
             (assoc :current (-> db :history peek)
                    :next nil
-                   :view/selected nil))}))
+                   :next.view/selected nil))}))
 
 (f/reg-event-fx
  ui-frame :punk.ui.browser/nav-to
@@ -192,10 +193,16 @@
     :emit [:nav idx k v]}))
 
 (f/reg-event-fx
- ui-frame :punk.ui.browser/select-view-type
+ ui-frame :punk.ui.browser/select-next-view
  []
  (fn [{:keys [db]} [_ id]]
-   {:db (assoc db :view/selected id)}))
+   {:db (assoc db :next.view/selected id)}))
+
+(f/reg-event-fx
+ ui-frame :punk.ui.browser/select-current-view
+ []
+ (fn [{:keys [db]} [_ id]]
+   {:db (assoc db :current.view/selected id)}))
 
 (f/reg-event-fx
  ui-frame :punk.ui.browser/register-view
@@ -249,19 +256,20 @@
    {:db (assoc db
                :next/loading false
                :next x
-               :view/selected nil)}))
+               :next.view/selected nil)}))
 
 ;;
 ;; Browser panes
 ;;
 
 (defnc Next [{:keys [view views current]}]
-  [pc/Pane {:title "Next"}
-   [:select {:value (str (:id view))
-             :on-change #(dispatch [:punk.ui.browser/select-view-type
-                                    (keyword (subs (.. % -target -value) 1))])}
-    (for [vid (map (comp str :id) views)]
-      [:option {:key vid} vid])]
+  [pc/Pane {:title "Next"
+            :controls [:div
+                       [:select {:value (str (:id view))
+                                 :on-change #(dispatch [:punk.ui.browser/select-next-view
+                                                        (keyword (subs (.. % -target -value) 1))])}
+                        (for [vid (map (comp str :id) views)]
+                          [:option {:key vid} vid])]]}
    [:div {:style {:display "flex"
                   :flex-direction "column"}}
     [(:view view)
@@ -269,12 +277,19 @@
       :id "next"
       :nav #(dispatch [:punk.ui.browser/view-next])}]]])
 
-(defnc Current [{:keys [history view current]}]
+(defnc Current [{:keys [history view views current]}]
   [pc/Pane {:title "Current"
             :id "current"
             :controls [:div
+                       [:select {:value (str (:id view))
+                                 :on-change #(dispatch [:punk.ui.browser/select-current-view
+                                                        (keyword (subs (.. % -target -value) 1))])}
+                        (for [vid (map (comp str :id) views)]
+                          [:option {:key vid} vid])]
                        [:button {:type "button"
-                                 :style {:width "60px"}
+                                 :style {:width "60px"
+                                         :margin-left "10px"
+                                         :margin-right "5px"}
                                  :disabled (empty? history)
                                  :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]]}
    [:div {:style {:display "flex"
@@ -288,12 +303,16 @@
   (let [next-views (-> (:views state)
                        (match-views (-> state :next :value)))
 
-        next-view (if (:view/selected state)
-                    (first (filter #(= (:id %) (:view/selected state)) next-views))
+        next-view (if (:next.view/selected state)
+                    (first (filter #(= (:id %) (:next.view/selected state)) next-views))
                     (first next-views))
-        current-view (-> (:views state)
-                         (match-views (-> state :current :value))
-                         (first))
+
+        current-views (-> (:views state)
+                          (match-views (-> state :current :value)))
+
+        current-view (if (:current.view/selected state)
+                       (first (filter #(= (:id %) (:current.view/selected state)) current-views))
+                       (first current-views))
         update-layout #(dispatch [:punk.ui.browser/change-layout %])]
     [:div {:style {:height "100%"}
            :id "punk-container"}
@@ -349,6 +368,7 @@
       [:div {:key "current"}
        [Current {:history (:history state)
                  :view current-view
+                 :views current-views
                  :current (-> state :current)}]]
       ;; Entries
       [:div {:key "entries"}
