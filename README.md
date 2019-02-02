@@ -23,11 +23,11 @@ In a browser project, include the `punk.adapter.web` library:
 
 Leiningen/Boot
 
-`[lilactown/punk-adapter-web "0.0.2-SNAPSHOT"]`
+`[lilactown/punk-adapter-web "0.0.2"]`
 
 Clojure CLI/deps.edn
 
-`lilactown/punk-adapter-web {:mvn/version "0.0.2-SNAPSHOT"}`
+`lilactown/punk-adapter-web {:mvn/version "0.0.2"}`
 
 Then, in your CLJS build preloads, include the `punk.adapter.web.preload` 
 namespace:
@@ -50,11 +50,11 @@ In a Node.js project, include the `punk.adapter.node` library:
 
 Leiningen/Boot
 
-`[lilactown/punk-adapter-node "0.0.2-SNAPSHOT"]`
+`[lilactown/punk-adapter-node "0.0.2"]`
 
 Clojure CLI/deps.edn
 
-`lilactown/punk-adapter-node {:mvn/version "0.0.2-SNAPSHOT"}`
+`lilactown/punk-adapter-node {:mvn/version "0.0.2"}`
 
 Then, in your CLJS build preloads, include the `punk.adapter.node.preload` 
 namespace:
