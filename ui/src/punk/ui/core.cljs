@@ -8,6 +8,7 @@
             [clojure.core.async :as a]
             [cljs.tools.reader.edn :as edn]
             [frame.core :as f]
+            [cljs.tagged-literals]
             [punk.ui.views :as views]
             [punk.ui.components :as pc]))
 
@@ -458,10 +459,14 @@
         win-size (<-window-size)]
     [Browser {:state state :width (:inner-width win-size)}]))
 
-
 (defn external-handler [ev]
   (try
-    (dispatch (edn/read-string ev))
+    (dispatch (edn/read-string
+               {:readers {'js (with-meta identity {:punk/literal-tag 'js})
+                          'inst cljs.tagged-literals/read-inst
+                          'uuid cljs.tagged-literals/read-uuid
+                          'queue cljs.tagged-literals/read-queue}}
+               ev))
     (catch js/Error e
       (println e))))
 
