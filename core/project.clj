@@ -1,4 +1,4 @@
-(defproject lilactown/punk-core "0.0.2-SNAPSHOT"
+(defproject lilactown/punk-core "0.0.2"
   :description "Punk application server core"
   :url "https://github.com/Lokeh/punk"
   :license {:name "EPL"
