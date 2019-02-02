@@ -78,3 +78,8 @@ simply use the `tap>` function to send it to the Punk application.
 ## Issues
 
 It's new, and still has bugs. Please file issues as you come across them!
+
+## Features
+
+If you have a feature request or any feedback on features, please create
+an issue with the "enhancement" tag.
