@@ -1,4 +1,4 @@
-(defproject lilactown/punk-adapter-node "0.0.2"
+(defproject lilactown/punk-adapter-node "0.0.3"
   :description "Punk node application adapter"
   :url "https://github.com/Lokeh/punk"
   :license {:name "EPL"
