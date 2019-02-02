@@ -295,6 +295,35 @@
       :id "next"
       :nav #(dispatch [:punk.ui.browser/view-next])}]]])
 
+(defnc Breadcrumbs [{:keys [items on-click]}]
+  [:<>
+   [pc/Style
+    ".punk__breadcrumb {"
+    "  padding-left: 6px;
+       padding-right: 6px;
+       margin-left: 2px;
+       margin-right: 2px;
+       background: #ddd;
+       border-radius: 4px;
+       color: #333;
+       text-decoration: none;
+       font-size: 13px"
+    "}"
+    ".punk__breadcrumb:hover { background: #fff;  }"
+    ".punk__breadcrumb_last { background: #fff; }"
+    ;; ".punk__breadcrumb_last:hover { background: #fff; }"
+    ]
+   (map-indexed
+    (fn [i x]
+      [:a {:href "#"
+           :on-click #(do (.preventDefault %)
+                          (on-click (+ i 1)))
+           :class "punk__breadcrumb"
+           :style {}} (str x)])
+    (drop-last items))
+   (when (seq items)
+     [:span {:class ["punk__breadcrumb" "punk__breadcrumb_last"]} (str (last items))])])
+
 (defnc Current [{:keys [history view views current]}]
   [pc/Pane
    {:title "Current"
@@ -311,17 +340,9 @@
                                  :margin-right "5px"}
                          :disabled (empty? history)
                          :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]
-               (->> history
-                    (map :nav-key)
-                    (map-indexed
-                     (fn [i k] [:<>
-                                [:a {:href "#"
-                                     :on-click #(do (.preventDefault %)
-                                                    (dispatch [:punk.ui.browser/history-nth i]))
-                                     :style {:padding-left "3px"
-                                             :padding-right "3px"
-                                             :margin-left "3px"
-                                             :margin-right "3px"}} (str k)]])))]}
+               [Breadcrumbs
+                {:items (map :nav-key history)
+                 :on-click #(dispatch [:punk.ui.browser/history-nth %])}]]}
    [:div {:style {:display "flex"
                   :flex-direction "column"}}
     [(:view view)
