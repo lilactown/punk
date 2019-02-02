@@ -8,13 +8,13 @@
   },
   "author": "",
   "devDependencies": {
-    "shadow-cljs": "^2.7.9",
+    "shadow-cljs": "^2.7.24",
     "showdown": "^1.9.0"
   },
   "dependencies": {
-    "react": "^16.7.0-alpha.2",
-    "react-dom": "^16.7.0-alpha.2",
+    "react": "^16.8.0-alpha.1",
+    "react-dom": "^16.8.0-alpha.1",
     "react-grid-layout": "^0.16.6",
-    "react-is": "^16.7.0-alpha.2"
+    "react-is": "^16.8.0-alpha.1"
   }
 }
