@@ -3,7 +3,7 @@
 Punk is a [REBL-like](https://www.youtube.com/watch?v=c52QhiXsmyI) data browser
 built for the web.
 
-![how to browser](./punk-1.gif)
+![screenshot](./screenshot.png)
 
 ## Usage
 
@@ -13,6 +13,8 @@ simply use the `tap>` function to send it to the Punk UI.
 While your application is running, you will be able to view the Punk UI
 either embedded on the webpage (browser) or on a web server started on your
 localhost (Node.js).
+
+![how to browser](./punk-1.gif)
 
 There are 3 *panes* that will appear in the Punk UI:
 
