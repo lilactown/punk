@@ -460,7 +460,10 @@
 
 
 (defn external-handler [ev]
-  (dispatch (edn/read-string ev)))
+  (try
+    (dispatch (edn/read-string ev))
+    (catch js/Error e
+      (println e))))
 
 (defn drawer-toggler []
   (dispatch [:punk.ui.drawer/toggle]))
