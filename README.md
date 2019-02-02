@@ -21,13 +21,7 @@ plumbing to allow your application to communicate to the UI application.
 
 In a browser project, include the `punk.adapter.web` library:
 
-Leiningen/Boot
-
-`[lilactown/punk-adapter-web "0.0.2"]`
-
-Clojure CLI/deps.edn
-
-`lilactown/punk-adapter-web {:mvn/version "0.0.2"}`
+[![Clojars Project](https://img.shields.io/clojars/v/lilactown/punk-adapter-web.svg)](https://clojars.org/lilactown/punk-adapter-web)
 
 Then, in your CLJS build preloads, include the `punk.adapter.web.preload` 
 namespace:
@@ -48,13 +42,7 @@ UI.
 
 In a Node.js project, include the `punk.adapter.node` library:
 
-Leiningen/Boot
-
-`[lilactown/punk-adapter-node "0.0.2"]`
-
-Clojure CLI/deps.edn
-
-`lilactown/punk-adapter-node {:mvn/version "0.0.2"}`
+[![Clojars Project](https://img.shields.io/clojars/v/lilactown/punk-adapter-node.svg)](https://clojars.org/lilactown/punk-adapter-node)
 
 Then, in your CLJS build preloads, include the `punk.adapter.node.preload` 
 namespace:
