@@ -3,7 +3,7 @@
 Punk is a [REBL-like](https://www.youtube.com/watch?v=c52QhiXsmyI) data browser
 built for the web.
 
-![screenshot](./screenshot.png)
+<img src="/screenshot.png" alt="screenshot" width="600">
 
 ## Usage
 
