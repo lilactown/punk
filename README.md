@@ -32,7 +32,7 @@ visualize the value in that pane.
 
 Currently, there are only simple aggregates (e.g. "map" for a tabular view of 
 maps, "coll" for a tabular view of collections) and an "edn" view for easy copy
-+ paste. *User-built custom views coming soon!*
+& paste. *User-built custom views coming soon!*
 
 
 ## How it works
