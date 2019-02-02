@@ -255,6 +255,35 @@
 ;; Browser panes
 ;;
 
+(defnc Next [{:keys [view views current]}]
+  [pc/Pane {:title "Next"}
+   [:select {:value (str (:id view))
+             :on-change #(dispatch [:punk.ui.browser/select-view-type
+                                    (keyword (subs (.. % -target -value) 1))])}
+    (for [vid (map (comp str :id) views)]
+      [:option {:key vid} vid])]
+   [:div {:style {:display "flex"
+                  :flex-direction "column"}}
+    [(:view view)
+     {:data (-> current :value)
+      :id "next"
+      :nav #(dispatch [:punk.ui.browser/view-next])}]]])
+
+(defnc Current [{:keys [history view current]}]
+  [pc/Pane {:title "Current"
+            :id "current"
+            :controls [:div
+                       [:button {:type "button"
+                                 :style {:width "60px"}
+                                 :disabled (empty? history)
+                                 :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]]}
+   [:div {:style {:display "flex"
+                  :flex-direction "column"}}
+    [(:view view)
+     {:data (-> current :value)
+      :nav #(dispatch [:punk.ui.browser/nav-to
+                       (-> current :idx) %2 %3])}]]])
+
 (defnc Browser [{:keys [state width]}]
   (let [next-views (-> (:views state)
                        (match-views (-> state :next :value)))
@@ -313,33 +342,14 @@
        :draggableHandle ".titlebar"}
       ;; Next
       [:div {:key "next"}
-       [pc/Pane {:title "Next"}
-        [:select {:value (str (:id next-view))
-                  :on-change #(dispatch [:punk.ui.browser/select-view-type
-                                         (keyword (subs (.. % -target -value) 1))])}
-         (for [vid (map (comp str :id) next-views)]
-           [:option {:key vid} vid])]
-        [:div {:style {:display "flex"
-                       :flex-direction "column"}}
-         [(:view next-view)
-          {:data (-> state :next :value)
-           :id "next"
-           :nav #(dispatch [:punk.ui.browser/view-next])}]]]]
+       [Next {:view next-view
+              :views next-views
+              :current (-> state :next)}]]
       ;; Current
       [:div {:key "current"}
-       [pc/Pane {:title "Current"
-                 :id "current"
-                 :controls [:div
-                            [:button {:type "button"
-                                      :style {:width "60px"}
-                                      :disabled (empty? (:history state))
-                                      :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]]}
-        [:div {:style {:display "flex"
-                       :flex-direction "column"}}
-         [(:view current-view)
-          {:data (-> state :current :value)
-           :nav #(dispatch [:punk.ui.browser/nav-to
-                            (-> state :current :idx) %2 %3])}]]]]
+       [Current {:history (:history state)
+                 :view current-view
+                 :current (-> state :current)}]]
       ;; Entries
       [:div {:key "entries"}
        [pc/Pane {:title "Entries" :id "entries"}
