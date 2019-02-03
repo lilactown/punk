@@ -502,7 +502,8 @@
           font-family: 'Source Sans Pro', sans-serif;
        }"
       "#punk__pop-out-button:hover { cursor: pointer; }"]
-     [:div {:style {:display "flex"}}
+     [:div {:style {:display "flex"
+                    :height "100%"}}
       (when-not collapsed?
         [:div {:id "punk__drawer-dragger"
                :on-mouse-down #(do
