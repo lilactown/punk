@@ -2,6 +2,7 @@
     font-family: 'Source Sans Pro', sans-serif;
     background: white;
     margin: 0;
+    height: 100%;
 }
 
 #punk__current .item {
@@ -12,6 +13,12 @@
     background-color: #eaeaea
         /*#44475a */
     ;
+}
+
+#punk__current__back-button {
+    width: 60px;
+    margin-left: 10px;
+    margin-right: 5px;
 }
 
 #punk__next {
@@ -44,11 +51,6 @@
     max-height: 100%;
 }
 
-/* #entries-grid { */
-/*     border: 1px solid #eee; */
-/*     box-shadow: 2px 2px 1px 1px #eee; */
-/* } */
-
 #punk__entries .item {
     cursor: pointer;
     padding: 3px 0;
@@ -59,6 +61,19 @@
     background-color: #eaeaea
         /*#44475a */
     ;
+}
+
+#punk__drawer-container {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 99999;
+}
+
+#punk__drawer-container__inner {
+    display: flex;
+    height: 100%;
 }
 
 #punk__drawer-toggle {
@@ -74,6 +89,24 @@
     cursor: pointer;
 }
 
+#punk__drawer-toggle__top-arrow {
+    position: absolute;
+    text-align: center;
+    left: 0;
+    right: 0;
+    top: 10;
+    font-size: 10px;
+}
+
+#punk__drawer-toggle__bottom-arrow {
+    position: absolute;
+    text-align: center;
+    left: 0;
+    right: 0;
+    bottom: 10;
+    font-size: 10px;
+}
+
 #punk__drawer-dragger {
     height: 100%;
     width: 3px;
@@ -81,6 +114,11 @@
 
 #punk__drawer-dragger:hover {
     cursor: col-resize;
+}
+
+#punk__drawer__browser {
+    flex: 1;
+    overflow: scroll;
 }
 
 #punk__pop-out-button {
@@ -114,4 +152,15 @@
 
 .punk__breadcrumb_last {
     background: #fff;
+}
+
+.punk__entry-column__id {
+    flex: 1;
+}
+
+.punk__entry-column__value {
+    flex: 11;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

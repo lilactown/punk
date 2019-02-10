@@ -293,12 +293,10 @@
                                                         (keyword (subs (.. % -target -value) 1))])}
                         (for [vid (map (comp str :id) views)]
                           [:option {:key vid} vid])]]}
-   [:div {:style {:display "flex"
-                  :flex-direction "column"}}
-    [(:view view)
-     {:data (-> current :value)
-      :id "punk__next"
-      :nav #(dispatch [:punk.ui.browser/view-next])}]]])
+   [(:view view)
+    {:data (-> current :value)
+     :id "punk__next"
+     :nav #(dispatch [:punk.ui.browser/view-next])}]])
 
 (defnc Breadcrumbs [{:keys [items on-click]}]
   [:<>
@@ -307,8 +305,7 @@
       [:a {:href "#"
            :on-click #(do (.preventDefault %)
                           (on-click (+ i 1)))
-           :class "punk__breadcrumb"
-           :style {}} (str x)])
+           :class "punk__breadcrumb"} (str x)])
     (drop-last items))
    (when (seq items)
      [:span {:class ["punk__breadcrumb" "punk__breadcrumb_last"]} (str (last items))])])
@@ -324,20 +321,16 @@
                 (for [vid (map (comp str :id) views)]
                   [:option {:key vid} vid])]
                [:button {:type "button"
-                         :style {:width "60px"
-                                 :margin-left "10px"
-                                 :margin-right "5px"}
+                         :id "punk__current__back-button"
                          :disabled (empty? history)
                          :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]
                [Breadcrumbs
                 {:items (map :nav-key history)
                  :on-click #(dispatch [:punk.ui.browser/history-nth %])}]]}
-   [:div {:style {:display "flex"
-                  :flex-direction "column"}}
-    [(:view view)
-     {:data (-> current :value)
-      :nav #(dispatch [:punk.ui.browser/nav-to
-                       (-> current :idx) %2 %3])}]]])
+   [(:view view)
+    {:data (-> current :value)
+     :nav #(dispatch [:punk.ui.browser/nav-to
+                      (-> current :idx) %2 %3])}]])
 
 (defnc Browser [{:keys [state width]}]
   (let [next-views (-> (:views state)
@@ -354,8 +347,7 @@
                        (first (filter #(= (:id %) (:current.view/selected state)) current-views))
                        (first current-views))
         update-layout #(dispatch [:punk.ui.browser/change-layout %])]
-    [:div {:style {:height "100%"}
-           :id "punk__container"}
+    [:div {:id "punk__container"}
      [GridLayout
       {:layout (:grid-layout state)
        :onLayoutChange update-layout
@@ -378,11 +370,8 @@
       [:div {:key "entries"}
        [pc/Pane {:title "Entries" :id "punk__entries"}
         (let [entries (reverse (map-indexed vector (:entries state)))]
-          [pc/Table {:cols [[:id first [:div {:style {:flex 1}}]]
-                            [:value (comp :value second) [:div {:style {:flex 11
-                                                                        :white-space "nowrap"
-                                                                        :overflow "hidden"
-                                                                        :text-overflow "ellipsis"}}]]
+          [pc/Table {:cols [[:id first [:div {:class "punk__entry-column__id"}]]
+                            [:value (comp :value second) [:div {:class "punk__entry-column__value"}]]
                             ;; [:meta (comp :meta second) {:flex 5}]
                             ]
                      :on-entry-click (fn [_ entry]
@@ -421,14 +410,9 @@
                                        (/ 100 (:drawer-width state))))]
     (<-mouse-move move-handler)
     (<-mouse-up #(reset! dragging? false))
-    [:div {:style {:position "fixed"
-                   :width width
-                   :top 0
-                   :bottom 0
-                   :right 0
-                   :z-index 99999}}
-     [:div {:style {:display "flex"
-                    :height "100%"}}
+    [:div {:id "punk__drawer-container"
+           :style {:width width}}
+     [:div {:id "punk__drawer-container__inner"}
       (when-not collapsed?
         [:div {:id "punk__drawer-dragger"
                :on-mouse-down #(do
@@ -436,23 +420,12 @@
                                  (reset! dragging? true))}])
       [:div {:id "punk__drawer-toggle"
              :on-click #(dispatch [:punk.ui.drawer/toggle])}
-       [:div {:style {:position "absolute"
-                      :text-align "center"
-                      :left 0
-                      :right 0
-                      :top 10
-                      :font-size "10px"}}
+       [:div {:id "punk__drawer-toggle__top-arrow"}
         (if collapsed? ">>" "<<")]
-       [:div {:style {:position "absolute"
-                      :text-align "center"
-                      :left 0
-                      :right 0
-                      :bottom 10
-                      :font-size "10px"}}
+       [:div {:id "punk__drawer-toggle__bottom-arrow"}
         (if collapsed? ">>" "<<")]]
       (when (not collapsed?)
-        [:div {:style {:flex 1
-                       :overflow "scroll"}}
+        [:div {:id "punk__drawer__browser"}
          [Browser {:state state
                    :width (- width 25)
                    :measureBeforeMount true}]
