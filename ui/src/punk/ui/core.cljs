@@ -297,27 +297,11 @@
                   :flex-direction "column"}}
     [(:view view)
      {:data (-> current :value)
-      :id "next"
+      :id "punk__next"
       :nav #(dispatch [:punk.ui.browser/view-next])}]]])
 
 (defnc Breadcrumbs [{:keys [items on-click]}]
   [:<>
-   [pc/Style
-    ".punk__breadcrumb {"
-    "  padding-left: 6px;
-       padding-right: 6px;
-       margin-left: 2px;
-       margin-right: 2px;
-       background: #ddd;
-       border-radius: 4px;
-       color: #333;
-       text-decoration: none;
-       font-size: 13px"
-    "}"
-    ".punk__breadcrumb:hover { background: #fff;  }"
-    ".punk__breadcrumb_last { background: #fff; }"
-    ;; ".punk__breadcrumb_last:hover { background: #fff; }"
-    ]
    (map-indexed
     (fn [i x]
       [:a {:href "#"
@@ -332,7 +316,7 @@
 (defnc Current [{:keys [history view views current]}]
   [pc/Pane
    {:title "Current"
-    :id "current"
+    :id "punk__current"
     :controls [:div
                [:select {:value (str (:id view))
                          :on-change #(dispatch [:punk.ui.browser/select-current-view
@@ -371,45 +355,9 @@
                        (first current-views))
         update-layout #(dispatch [:punk.ui.browser/change-layout %])]
     [:div {:style {:height "100%"}
-           :id "punk-container"}
-     [pc/Style
-      "#punk-container {"
-      "  font-family: 'Source Sans Pro', sans-serif;"
-      "  background: white;"
-      "  margin: 0;"
-      "}"
-      (str "#current-grid {"
-           "       box-shadow: 2px 2px 1px 1px #eee;"
-           "       border: 1px solid #eee;"
-           "}")
-      "#current .item { cursor: pointer;}"
-      "#current .item:hover { background-color: #eaeaea /*#44475a */; }"
-
-      (str       "#next { overflow: auto;"
-                 "       max-height: 100%;"
-                 "}")
-      (str "#next-grid {"
-           "       border: 1px solid #eee;"
-           "       box-shadow: 2px 2px 1px 1px #eee;"
-           "}")
-      "#next { cursor: pointer; padding: 3px; margin: 3px; }"
-      "#next:hover { background-color: #eaeaea /* #44475a */; }"
-      "#next.nohover { cursor: initial; }"
-      "#next.nohover:hover { background-color: initial; }"
-
-      (str "#entries { overflow: auto;"
-           "       max-height: 100%;"
-
-           "}")
-      (str "#entries-grid {"
-           "       border: 1px solid #eee;"
-           "       box-shadow: 2px 2px 1px 1px #eee;"
-           "}")
-      "#entries .item { cursor: pointer; padding: 3px 0; margin: 3px 0; }"
-      "#entries .item:hover { background-color: #eaeaea /*#44475a */; }"]
+           :id "punk__container"}
      [GridLayout
-      {:class "layout"
-       :layout (:grid-layout state)
+      {:layout (:grid-layout state)
        :onLayoutChange update-layout
        :cols 12
        :rowHeight 30
@@ -428,7 +376,7 @@
                  :current (-> state :current)}]]
       ;; Entries
       [:div {:key "entries"}
-       [pc/Pane {:title "Entries" :id "entries"}
+       [pc/Pane {:title "Entries" :id "punk__entries"}
         (let [entries (reverse (map-indexed vector (:entries state)))]
           [pc/Table {:cols [[:id first [:div {:style {:flex 1}}]]
                             [:value (comp :value second) [:div {:style {:flex 11
@@ -479,29 +427,6 @@
                    :bottom 0
                    :right 0
                    :z-index 99999}}
-     [pc/Style
-      "#punk__drawer-toggle {"
-      " background: #f3f3f3;"
-      " height: 100%;"
-      " width: 20px;"
-      " position: relative;"
-      " border: 1px solid #eee;"
-      "}"
-      "#punk__drawer-toggle:hover {"
-      " background: #ddd;"
-      " cursor: pointer;"
-      "}"
-      "#punk__drawer-dragger { height: 100%; width: 3px; }"
-      "#punk__drawer-dragger:hover { cursor: col-resize; }"
-      "#punk__pop-out-button {
-          position: absolute;
-          bottom: 0;
-          right: 0;
-          padding: 10px;
-          background: #eee;
-          font-family: 'Source Sans Pro', sans-serif;
-       }"
-      "#punk__pop-out-button:hover { cursor: pointer; }"]
      [:div {:style {:display "flex"
                     :height "100%"}}
       (when-not collapsed?

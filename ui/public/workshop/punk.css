@@ -1,0 +1,117 @@
+#punk__container {
+    font-family: 'Source Sans Pro', sans-serif;
+    background: white;
+    margin: 0;
+}
+
+#punk__current .item {
+    cursor: pointer;
+}
+
+#punk__current .item:hover {
+    background-color: #eaeaea
+        /*#44475a */
+    ;
+}
+
+#punk__next {
+    overflow: auto;
+    max-height: 100%;
+}
+
+#punk__next {
+    cursor: pointer;
+    padding: 3px;
+    margin: 3px;
+}
+
+#punk__next:hover {
+    background-color: #eaeaea
+        /* #44475a */
+    ;
+}
+
+#punk__next.nohover {
+    cursor: initial;
+}
+
+#punk__next.nohover:hover {
+    background-color: initial;
+}
+
+#punk__entries {
+    overflow: auto;
+    max-height: 100%;
+}
+
+/* #entries-grid { */
+/*     border: 1px solid #eee; */
+/*     box-shadow: 2px 2px 1px 1px #eee; */
+/* } */
+
+#punk__entries .item {
+    cursor: pointer;
+    padding: 3px 0;
+    margin: 3px 0;
+}
+
+#punk__entries .item:hover {
+    background-color: #eaeaea
+        /*#44475a */
+    ;
+}
+
+#punk__drawer-toggle {
+    background: #f3f3f3;
+    height: 100%;
+    width: 20px;
+    position: relative;
+    border: 1px solid #eee;
+}
+
+#punk__drawer-toggle:hover {
+    background: #ddd;
+    cursor: pointer;
+}
+
+#punk__drawer-dragger {
+    height: 100%;
+    width: 3px;
+}
+
+#punk__drawer-dragger:hover {
+    cursor: col-resize;
+}
+
+#punk__pop-out-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 10px;
+    background: #eee;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+#punk__pop-out-button:hover {
+    cursor: pointer;
+}
+
+.punk__breadcrumb {
+    padding-left: 6px;
+    padding-right: 6px;
+    margin-left: 2px;
+    margin-right: 2px;
+    background: #ddd;
+    border-radius: 4px;
+    color: #333;
+    text-decoration: none;
+    font-size: 13px
+}
+
+.punk__breadcrumb:hover {
+    background: #fff;
+}
+
+.punk__breadcrumb_last {
+    background: #fff;
+}

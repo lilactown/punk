@@ -16,7 +16,8 @@
   (let [opts {:ui/script ""
               :ui/css ["https://fonts.googleapis.com/css?family=Source+Sans+Pro"
                        "http://localhost:8700/grid-layout.css"
-                       "http://localhost:8700/resizable.css"]}]
+                       "http://localhost:8700/resizable.css"
+                       "http://localhost:8700/punk.css"]}]
     (adapter/start opts) ;; creates DOM nodes
     (adapter/start-ui! opts)))
 
