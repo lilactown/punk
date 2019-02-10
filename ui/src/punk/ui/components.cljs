@@ -21,18 +21,12 @@
                       on-entry-click] :as props}]
   (let [key-fn (-> cols first second)]
     [:div (dissoc props :data :cols :on-next :on-entry-click)
-     [:div {:style {:display "flex"
-                    :border-bottom "1px solid #999"
-                    :padding-bottom "3px"
-                    :margin-bottom "3px"}}
+     [:div {:class "punk__table__top-labels"}
       (for [[col-name _ display-comp] cols]
         (conj display-comp (name col-name)))]
      (for [d data]
-       [:div {:style {:display "flex"
-                      :padding "3px 5px"
-                      :margin "3px 0"}
-              :key (key-fn d)
-              :class "item"
+       [:div {:key (key-fn d)
+              :class "punk__table__item"
               :on-click #(on-entry-click (key-fn d) d)}
         (for [[_ pick display-comp] cols]
           (conj display-comp (prn-str (pick d))))])]))
