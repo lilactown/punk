@@ -354,7 +354,7 @@
        :cols 12
        :rowHeight 30
        :width width
-       :draggableHandle ".titlebar"}
+       :draggableHandle ".punk__pane__titlebar"}
       ;; Next
       [:div {:key "next"}
        [Next {:view next-view
