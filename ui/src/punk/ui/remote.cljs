@@ -4,7 +4,7 @@
             [cljs.tools.reader.edn :as edn]
             [frame.core :as f]
             [hx.react :as hx :refer [defnc]]
-            [hx.react.hooks :as hooks :refer [<-deref <-effect]]
+            [hx.hooks :as hooks :refer [<-deref <-effect]]
             ["react-dom" :as react-dom]))
 
 (defonce in-chan (a/chan))
