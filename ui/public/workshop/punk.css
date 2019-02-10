@@ -59,6 +59,29 @@
     margin: 3px 0;
 }
 
+/* Breadcrumb */
+
+.punk__breadcrumb {
+    padding-left: 6px;
+    padding-right: 6px;
+    margin-left: 2px;
+    margin-right: 2px;
+    background: #ddd;
+    border-radius: 4px;
+    color: #333;
+    text-decoration: none;
+    font-size: 13px
+}
+
+.punk__breadcrumb:hover {
+    background: #fff;
+}
+
+.punk__breadcrumb_last {
+    background: #fff;
+}
+
+
 /**
 * Main browser styles
 **/
@@ -84,26 +107,6 @@
     width: 60px;
     margin-left: 10px;
     margin-right: 5px;
-}
-
-.punk__breadcrumb {
-    padding-left: 6px;
-    padding-right: 6px;
-    margin-left: 2px;
-    margin-right: 2px;
-    background: #ddd;
-    border-radius: 4px;
-    color: #333;
-    text-decoration: none;
-    font-size: 13px
-}
-
-.punk__breadcrumb:hover {
-    background: #fff;
-}
-
-.punk__breadcrumb_last {
-    background: #fff;
 }
 
 
@@ -160,7 +163,10 @@
     text-overflow: ellipsis;
 }
 
-/* Drawer styles */
+
+/**
+* Drawer styles
+**/
 
 #punk__drawer-container {
     position: fixed;
