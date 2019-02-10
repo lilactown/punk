@@ -1,6 +1,6 @@
 (ns punk.ui.core
   (:require [hx.react :as hx :refer [defnc]]
-            [hx.react.hooks :refer [<-deref <-state <-effect <-ref]]
+            [hx.hooks :refer [<-deref <-state <-effect <-ref]]
             ["react-dom" :as react-dom]
             ["react-grid-layout" :as GridLayout]
             [goog.object :as gobj]
@@ -37,7 +37,7 @@
           ;; return the unsubscribe function
           #(.removeEventListener window "resize" handle-resize)))
       ;; only re-sub on re-mount or new window val
-      #js [window])
+      [window])
 
      ;; return value
      @window-size)))
@@ -452,7 +452,7 @@
                   (.addEventListener win "unload"
                                      on-close)
                   #(.removeEventListener win "unload" on-close)))
-              #js [win])
+              [win])
     (when target
       (react-dom/createPortal
        (hx/f [Browser {:state state

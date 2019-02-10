@@ -1,8 +1,8 @@
 {:paths ["src" "workshop" "release-test"]
- :deps {org.clojure/clojurescript {:mvn/version "1.10.516"}
+ :deps {;; org.clojure/clojurescript {:mvn/version "1.10.516"}
         binaryage/devtools {:mvn/version "0.9.7"}
         devcards {:mvn/version "0.2.5"}
-        lilactown/hx {:mvn/version "0.2.5"}
+        lilactown/hx {:mvn/version "0.3.0"}
         lilactown/hx-frisk {:mvn/version "0.0.2-SNAPSHOT"}
         frame {:local/root "../frame"}
         punk/adapter-web {:local/root "../adapter-web"}}}
