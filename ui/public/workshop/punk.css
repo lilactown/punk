@@ -1,3 +1,50 @@
+/** punk.css - Default theme **/
+
+/**
+* Common component styles
+**/
+
+/* Pane */
+.punk__pane__container {
+    border: 1px solid #ddd;
+    box-shadow: 2px 2px 1px 1px #eee;
+    height: 100%;
+    background: white;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.punk__pane__body-container {
+    overflow: auto;
+    flex: 1;
+}
+
+.punk__pane__body {
+    padding: 8px;
+}
+
+.punk__pane__titlebar {
+    background: #eee;
+    padding: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    cursor: move;
+}
+
+.punk__pane__titlebar > span {
+    font-size: 1.17em;
+    font-weight: 500;
+}
+
+.punk__pane__bottom-controls {
+    padding: 5px 8px;
+    background: #eee;
+}
+
+/* Main browser styles */
+
 #punk__container {
     font-family: 'Source Sans Pro', sans-serif;
     background: white;
@@ -20,6 +67,27 @@
     margin-left: 10px;
     margin-right: 5px;
 }
+
+.punk__breadcrumb {
+    padding-left: 6px;
+    padding-right: 6px;
+    margin-left: 2px;
+    margin-right: 2px;
+    background: #ddd;
+    border-radius: 4px;
+    color: #333;
+    text-decoration: none;
+    font-size: 13px
+}
+
+.punk__breadcrumb:hover {
+    background: #fff;
+}
+
+.punk__breadcrumb_last {
+    background: #fff;
+}
+
 
 #punk__next {
     overflow: auto;
@@ -62,6 +130,19 @@
         /*#44475a */
     ;
 }
+
+.punk__entry-column__id {
+    flex: 1;
+}
+
+.punk__entry-column__value {
+    flex: 11;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Drawer styles */
 
 #punk__drawer-container {
     position: fixed;
@@ -134,33 +215,3 @@
     cursor: pointer;
 }
 
-.punk__breadcrumb {
-    padding-left: 6px;
-    padding-right: 6px;
-    margin-left: 2px;
-    margin-right: 2px;
-    background: #ddd;
-    border-radius: 4px;
-    color: #333;
-    text-decoration: none;
-    font-size: 13px
-}
-
-.punk__breadcrumb:hover {
-    background: #fff;
-}
-
-.punk__breadcrumb_last {
-    background: #fff;
-}
-
-.punk__entry-column__id {
-    flex: 1;
-}
-
-.punk__entry-column__value {
-    flex: 11;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
