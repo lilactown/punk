@@ -1,0 +1,241 @@
+/** punk.css - Default theme **/
+
+/**
+* Common component styles
+**/
+
+/* Pane */
+.punk__pane__container {
+    border: 1px solid #ddd;
+    box-shadow: 2px 2px 1px 1px #eee;
+    height: 100%;
+    background: white;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.punk__pane__body-container {
+    overflow: auto;
+    flex: 1;
+}
+
+.punk__pane__body {
+    padding: 8px;
+}
+
+.punk__pane__titlebar {
+    background: #eee;
+    padding: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    cursor: move;
+}
+
+.punk__pane__titlebar > span {
+    font-size: 1.17em;
+    font-weight: 500;
+}
+
+.punk__pane__bottom-controls {
+    padding: 5px 8px;
+    background: #eee;
+}
+
+
+/* Table */
+
+.punk__table__top-labels {
+    display: flex;
+    border-bottom: 1px solid #999;
+    padding-bottom: 3px;
+    margin-bottom: 3px;
+}
+
+.punk__table__item {
+    display: flex;
+    padding: 3px 5px;
+    margin: 3px 0;
+}
+
+/* Breadcrumb */
+
+.punk__breadcrumb {
+    padding-left: 6px;
+    padding-right: 6px;
+    margin-left: 2px;
+    margin-right: 2px;
+    background: #ddd;
+    border-radius: 4px;
+    color: #333;
+    text-decoration: none;
+    font-size: 13px
+}
+
+.punk__breadcrumb:hover {
+    background: #fff;
+}
+
+.punk__breadcrumb_last {
+    background: #fff;
+}
+
+
+/**
+* Main browser styles
+**/
+
+#punk__container {
+    font-family: 'Source Sans Pro', sans-serif;
+    background: white;
+    margin: 0;
+    height: 100%;
+}
+
+#punk__current .punk__table__item {
+    cursor: pointer;
+}
+
+#punk__current .punk__table__item:hover {
+    background-color: #eaeaea
+        /*#44475a */
+    ;
+}
+
+#punk__current__back-button {
+    width: 60px;
+    margin-left: 10px;
+    margin-right: 5px;
+}
+
+
+#punk__next {
+    overflow: auto;
+    max-height: 100%;
+}
+
+#punk__next {
+    cursor: pointer;
+    padding: 3px;
+    margin: 3px;
+}
+
+#punk__next:hover {
+    background-color: #eaeaea
+        /* #44475a */
+    ;
+}
+
+#punk__next.nohover {
+    cursor: initial;
+}
+
+#punk__next.nohover:hover {
+    background-color: initial;
+}
+
+#punk__entries {
+    overflow: auto;
+    max-height: 100%;
+}
+
+#punk__entries .punk__table__item {
+    cursor: pointer;
+    padding: 3px 0;
+    margin: 3px 0;
+}
+
+#punk__entries .punk__table__item:hover {
+    background-color: #eaeaea
+        /*#44475a */
+    ;
+}
+
+.punk__entry-column__id {
+    flex: 1;
+}
+
+.punk__entry-column__value {
+    flex: 11;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/**
+* Drawer styles
+**/
+
+#punk__drawer-container {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 99999;
+}
+
+#punk__drawer-container__inner {
+    display: flex;
+    height: 100%;
+}
+
+#punk__drawer-toggle {
+    background: #f3f3f3;
+    height: 100%;
+    width: 20px;
+    position: relative;
+    border: 1px solid #eee;
+}
+
+#punk__drawer-toggle:hover {
+    background: #ddd;
+    cursor: pointer;
+}
+
+#punk__drawer-toggle__top-arrow {
+    position: absolute;
+    text-align: center;
+    left: 0;
+    right: 0;
+    top: 10;
+    font-size: 10px;
+}
+
+#punk__drawer-toggle__bottom-arrow {
+    position: absolute;
+    text-align: center;
+    left: 0;
+    right: 0;
+    bottom: 10;
+    font-size: 10px;
+}
+
+#punk__drawer-dragger {
+    height: 100%;
+    width: 3px;
+}
+
+#punk__drawer-dragger:hover {
+    cursor: col-resize;
+}
+
+#punk__drawer__browser {
+    flex: 1;
+    overflow: scroll;
+}
+
+#punk__pop-out-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 10px;
+    background: #eee;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+#punk__pop-out-button:hover {
+    cursor: pointer;
+}
+
