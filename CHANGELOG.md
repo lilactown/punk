@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.0.5] - Unreleased
+## [0.0.5] - Feb 11, 2019
 
  - Fixed https://github.com/Lokeh/punk/issues/2 for unknown reader literals on 
  both server and client
