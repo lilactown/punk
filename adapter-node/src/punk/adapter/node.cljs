@@ -3,6 +3,7 @@
             [punk.core :as punk]
             [frame.core :as f]
             [cljs.tools.reader.edn :as edn]
+            [cljs.tagged-literals]
             ["http" :as http]
             ["ws" :as ws]))
 
@@ -58,7 +59,14 @@
               (.send ws (pr-str v))))
            (.on ws "message"
                 (fn message [m]
-                  (punk/dispatch (edn/read-string m))))
+                  (punk/dispatch
+                   (edn/read-string
+                    {:readers {;; 'js (with-meta identity {:punk/literal-tag 'js})
+                               'inst cljs.tagged-literals/read-inst
+                               'uuid cljs.tagged-literals/read-uuid
+                               'queue cljs.tagged-literals/read-queue}
+                     :default tagged-literal}
+                    m))))
            (.on ws "close" (fn close [] nil))))
 
     ;; setup the http server

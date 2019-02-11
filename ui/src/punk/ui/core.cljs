@@ -447,10 +447,11 @@
 (defn external-handler [ev]
   (try
     (dispatch (edn/read-string
-               {:readers {'js (with-meta identity {:punk/literal-tag 'js})
+               {:readers {;; 'js (with-meta identity {:punk/literal-tag 'js})
                           'inst cljs.tagged-literals/read-inst
                           'uuid cljs.tagged-literals/read-uuid
-                          'queue cljs.tagged-literals/read-queue}}
+                          'queue cljs.tagged-literals/read-queue}
+                :default tagged-literal}
                ev))
     (catch js/Error e
       (println e))))
