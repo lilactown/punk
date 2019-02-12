@@ -6,9 +6,13 @@
 
 (devcards.core/start-devcard-ui!)
 
-(dc/defcard Inspector
-  (hx/f [:div {:styles {:height "200px"}}
+(dc/defcard Plain-Inspector
+  (hx/f [:div {:style {:height "200px"}}
          [insp/Inspector]]))
+
+(dc/defcard Preview-Inspector
+  (hx/f [:div {:style {:height "200px"}}
+         [insp/Preview]]))
 
 (dc/defcard pane
   (hx/f [:div {:style {:position "relative"

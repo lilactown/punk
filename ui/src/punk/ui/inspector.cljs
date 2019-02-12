@@ -1,5 +1,6 @@
 (ns punk.ui.inspector
   (:require [hx.react :as hx :refer [defnc]]
+            [hx.hooks :refer [<-state]]
             [punk.ui.components :as pc]
             [punk.ui.views :as views]
             [clojure.string :as s]))
@@ -31,10 +32,48 @@
            :view #'views/MapView})
 
 (def history [{:nav-key 0}
+              {:nav-key :cdk/component}
               {:nav-key [123]}])
 
 (def current {:value {:asdf ['jkl]
                       :foo {:bar #{:baz/yuiop}}}})
+
+(defnc Preview [_]
+  [pc/Pane {:title [:span [:a {:href ""} "Inspector"] " : " "Preview"]
+            :id "punk__inspector__preview"
+            :controls [:div {:style {:display "flex"}}
+                       [:div {:style {:flex 3
+                                      :padding "5px 0"
+                                      :background "white"
+                                      :border-right "1px solid #eee"}}]
+                       [:div {:style {:flex 9
+                                      :padding "5px 8px"}}
+                        [:select {:value (str (:id view))
+                                  ;; :on-change #(dispatch [:punk.ui.browser/select-current-view
+                                  ;;                        (keyword (subs (.. % -target -value) 1))])
+                                  }
+                         (for [vid (map (comp str :id) views)]
+                           [:option {:key vid} vid])]
+                        [:button {:id "punk__current__back-button"} "Nav"]]]}
+   [:div {:style {:display "flex" :min-height "100%"}}
+    [:div {:style {:flex 3
+                   :border-right "1px solid #eee"
+                   ;; :padding "8px"
+                   }}
+     ;; [:div {:style {:border-bottom "1px solid #999"}} "key"]
+     [:div
+      (map #(vector
+             :div
+             {:style (merge {:padding "3px 5px"
+                             :margin "3px 0"}
+                            (when (= % :asdf)
+                              {:background "#eee"}))}
+             (str %))
+           '(:asdf :jkl))]]
+    [:div {:style {:flex 9
+                   :padding "8px"}}
+     [views/CollView
+      {:data (-> current :value :asdf)}]]]])
 
 (defnc Inspector [_]
   [pc/Pane
