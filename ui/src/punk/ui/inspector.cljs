@@ -39,7 +39,8 @@
                       :foo {:bar #{:baz/yuiop}}}})
 
 (defnc Preview [_]
-  [pc/Pane {:title [:span [:a {:href ""} "Inspector"] " > " "Preview"]
+  [pc/Pane {:title [:span [:a {:href ""
+                               :on-click #(.preventDefault %)} "Inspector"] " > " "Preview"]
             :id "punk__inspector__preview"
             :controls [:div {:style {:display "flex"}}
                        [:div {:style {:flex 3
