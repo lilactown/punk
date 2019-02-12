@@ -30,3 +30,15 @@
               :on-click #(on-entry-click (key-fn d) d)}
         (for [[_ pick display-comp] cols]
           (conj display-comp (prn-str (pick d))))])]))
+
+(defnc Breadcrumbs [{:keys [items on-click]}]
+  [:<>
+   (map-indexed
+    (fn [i x]
+      [:a {:href "#"
+           :on-click #(do (.preventDefault %)
+                          (on-click (+ i 1)))
+           :class "punk__breadcrumb"} (str x)])
+    (drop-last items))
+   (when (seq items)
+     [:span {:class ["punk__breadcrumb" "punk__breadcrumb_last"]} (str (last items))])])

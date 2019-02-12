@@ -1,9 +1,14 @@
 (ns punk.workshop.devcards
   (:require [devcards.core :as dc :include-macros true]
             [punk.ui.components :as punk-ui]
+            [punk.ui.inspector :as insp]
             [hx.react :as hx]))
 
 (devcards.core/start-devcard-ui!)
+
+(dc/defcard Inspector
+  (hx/f [:div {:styles {:height "200px"}}
+         [insp/Inspector]]))
 
 (dc/defcard pane
   (hx/f [:div {:style {:position "relative"
@@ -28,18 +33,18 @@
             [:div "Child " n])]]))
 
 (dc/defcard table-coll
-  (hx/f [punk-ui/Table {:cols [[:idx first {:flex 1}]
-                               [:value second {:flex 3}]]
+  (hx/f [punk-ui/Table {:cols [[:idx first [:div {:style {:flex 1}}]]
+                               [:value second [:div {:style {:flex 3}}]]]
                         :data (map-indexed vector [1 2 3 4])}]))
 
 (dc/defcard table-map
-  (hx/f [punk-ui/Table {:cols [[:key (comp str first) {:flex 1}]
-                               [:value (comp prn-str second) {:flex 3}]]
+  (hx/f [punk-ui/Table {:cols [[:key first [:div {:style {:flex 1}}]]
+                               [:value second [:div {:style {:flex 3}}]]]
                         :data {:foo "bar" :baz #{1 2 3}}}]))
 
 (dc/defcard table-multiple-things
-  (hx/f [punk-ui/Table {:cols [[:key (comp str first) {:flex 1}]
-                               [:value (comp prn-str second) {:flex 3}]
-                               [:meta (comp prn-str meta second) {:flex 3}]]
+  (hx/f [punk-ui/Table {:cols [[:key first [:div {:style {:flex 1}}]]
+                               [:value second [:div {:style {:flex 3}}]]
+                               [:meta (comp meta second) [:div {:style {:flex 3}}]]]
                         :data {:foo (with-meta {:asdf "jkl"} {:punk/tag 'cljs.core/Map})
                                :baz (with-meta #{1 2 3} {:punk/tag 'cljs.core/Set})}}]))

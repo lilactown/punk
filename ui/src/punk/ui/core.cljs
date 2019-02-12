@@ -303,18 +303,6 @@
      :id "punk__next"
      :nav #(dispatch [:punk.ui.browser/nav-to-next])}]])
 
-(defnc Breadcrumbs [{:keys [items on-click]}]
-  [:<>
-   (map-indexed
-    (fn [i x]
-      [:a {:href "#"
-           :on-click #(do (.preventDefault %)
-                          (on-click (+ i 1)))
-           :class "punk__breadcrumb"} (str x)])
-    (drop-last items))
-   (when (seq items)
-     [:span {:class ["punk__breadcrumb" "punk__breadcrumb_last"]} (str (last items))])])
-
 (defnc Current [{:keys [history view views current]}]
   [pc/Pane
    {:title "Current"
@@ -329,7 +317,7 @@
                          :id "punk__current__back-button"
                          :disabled (empty? history)
                          :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]
-               [Breadcrumbs
+               [pc/Breadcrumbs
                 {:items (map :nav-key history)
                  :on-click #(dispatch [:punk.ui.browser/history-nth %])}]]}
    [(:view view)
