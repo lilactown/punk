@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.6] - Feb 12, 2019
+
+ - Previewing a value in the **Next** pane doesn't call `nav` on the value.
+ Instead, `nav` is only called once the value moves into the **Current** pane.
+
 ## [0.0.5] - Feb 11, 2019
 
  - Fixed https://github.com/Lokeh/punk/issues/2 for unknown reader literals on 
