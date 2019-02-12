@@ -39,8 +39,18 @@
                       :foo {:bar #{:baz/yuiop}}}})
 
 (defnc Preview [_]
-  [pc/Pane {:title [:span [:a {:href ""
-                               :on-click #(.preventDefault %)} "Inspector"] " > " "Preview"]
+  [pc/Pane {:title [:div
+                    [:span "Thingy" " :: "
+                     [:a {:href ""
+                          :on-click #(.preventDefault %)} "Inspector"] " > " "Preview"]
+                    [:div {:style {:float "right"
+                                   :display "flex"}}
+                     [:div {:style {:cursor "pointer"
+                                    :padding "0 4px"
+                                    :margin "0 4px"}} "—"]
+                     [:div {:style {:cursor "pointer"
+                                    :padding "0 4px"
+                                    :margin "0 -4px 0 4px"}} "ｘ"]]]
             :id "punk__inspector__preview"
             :controls [:div {:style {:display "flex"}}
                        [:div {:style {:flex 3
@@ -74,7 +84,7 @@
      [:div
       (map #(vector
              :div
-             {:style (merge {:padding "3px 5px"
+             {:style (merge {:padding "3px 8px"
                              :margin "3px 0"}
                             (when (= % :asdf)
                               {:background "#eee"}))}
@@ -87,7 +97,16 @@
 
 (defnc Inspector [_]
   [pc/Pane
-   {:title "Inspector"
+   {:title [:div
+            [:span "Thingy" " :: " " Inspector"]
+            [:div {:style {:float "right"
+                           :display "flex"}}
+             [:div {:style {:cursor "pointer"
+                            :padding "0 4px"
+                            :margin "0 4px"}} "—"]
+             [:div {:style {:cursor "pointer"
+                            :padding "0 4px"
+                            :margin "0 -4px 0 4px"}} "ｘ"]]]
     :id "punk__current"
     :controls [:div
                [:select {:value (str (:id view))
