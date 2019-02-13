@@ -53,6 +53,7 @@
     cursor: pointer;
     padding: 0 4px;
     margin: 0 4px;
+    line-height: 20px;
 }
 
 .punk__pane__top-controls > div:last-child {

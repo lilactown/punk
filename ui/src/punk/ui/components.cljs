@@ -22,8 +22,9 @@
 
 (defnc TopControls [{:keys [on-close on-minimize]}]
   [:div {:class "punk__pane__top-controls"}
-   [:div "—"]
-   [:div "ｘ"]])
+   (when on-minimize
+     [:div "—"])
+   (when on-close [:div "ｘ"])])
 
 (defnc Table [{:keys [cols data
                       on-entry-click] :as props}]

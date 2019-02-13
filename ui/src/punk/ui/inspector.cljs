@@ -10,7 +10,7 @@
                         on-inspector on-view-select
                         on-select on-nav]}]
   [pc/Pane {:title [:div
-                    [:span "Thingy" " :: "
+                    [:span name " :: "
                      [:a {:href ""
                           :on-click #(do (.preventDefault %)
                                          (on-inspector))}
@@ -55,7 +55,7 @@
                           on-back on-view-select]}]
   [pc/Pane
    {:title [:div
-            [:span "Thingy" " :: " " Inspector"]
+            [:span name " :: " " Inspector"]
             [pc/TopControls {:on-close on-close :on-minimize on-minimize}]]
     :class "punk__inspector"
     :controls [:div

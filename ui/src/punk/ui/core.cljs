@@ -10,7 +10,8 @@
             [frame.core :as f]
             [cljs.tagged-literals]
             [punk.ui.views :as views]
-            [punk.ui.components :as pc]))
+            [punk.ui.components :as pc]
+            [punk.ui.inspector :as insp]))
 
 ;;
 ;; Helpers
@@ -84,8 +85,7 @@
                       :next nil
                       :collapsed? true
                       :drawer-width 50
-                      :grid-layout #js [#js {:i "next" :x 0 :y 0 :w 12 :h 6}
-                                        #js {:i "current" :x 0 :y 6 :w 12 :h 6}
+                      :grid-layout #js [#js {:i "asdfjkl" :x 0 :y 0 :w 12 :h 6}
                                         #js {:i "entries" :x 0 :y 12 :w 12 :h 6}]
                       :views [{:id :punk.view/nil
                                :match nil?
@@ -155,79 +155,6 @@
    {:db (update db :collapsed? not)}))
 
 (f/reg-event-fx
- ui-frame :punk.ui.browser/view-entry
- [#_debug-db #_debug-event]
- (fn [{:keys [db]} [_ x]]
-   {:db (assoc db
-               :current x
-               :next nil
-               :current/loading false
-               :current.view/selected nil
-               :history [])}))
-
-(f/reg-event-fx
- ui-frame :punk.ui.browser/history-back
- [#_debug-db #_debug-event]
- (fn [{:keys [db]} _]
-   {:db (-> db
-            (update :history pop)
-            (assoc :current (-> db :history peek)
-                   :next nil
-                   :next.view/selected nil
-                   :current.view/selected nil))}))
-
-(f/reg-event-fx
- ui-frame :punk.ui.browser/history-nth
- [#_debug-db #_debug-event]
- (fn [{:keys [db]} [_ idx]]
-   (let [current (nth (:history db) idx)]
-   {:db (-> db
-            (assoc :history (vec (take idx (:history db)))
-                   :current current
-                   :next nil
-                   :next/key (:nav-key current)
-                   :next.view/selected nil
-                   :current.view/selected nil))})))
-
-(f/reg-event-fx
- ui-frame :punk.ui.browser/preview
- [#_debug-db #_debug-event]
- (fn [{:keys [db]} [_ idx k v]]
-   (let [next-val (get (:current db) k v)
-         next-meta (meta next-val)]
-   {:db (assoc db
-               :next.view/key k
-               :next.view/selected nil
-               :next {:value next-val
-                      :key k
-                      :meta next-meta})})))
-
-(f/reg-event-fx
- ui-frame :punk.ui.browser/nav-to-next
- [#_debug-db #_debug-event]
- (fn [{:keys [db]} [_]]
-   (let [{:keys [key value]} (:next db)
-         {:keys [idx]} (:current db)]
-     {:db (-> db
-              (assoc
-               :current/loading true
-               :next.view/selected nil
-               :next nil))
-      :emit [:nav idx key value]})))
-
-(f/reg-event-fx
- ui-frame :punk.ui.browser/select-next-view
- []
- (fn [{:keys [db]} [_ id]]
-   {:db (assoc db :next.view/selected id)}))
-
-(f/reg-event-fx
- ui-frame :punk.ui.browser/select-current-view
- []
- (fn [{:keys [db]} [_ id]]
-   {:db (assoc db :current.view/selected id)}))
-
-(f/reg-event-fx
  ui-frame :punk.ui.browser/register-view
  [#_debug-db]
  (fn [{:keys [db]} [_ v]]
@@ -290,41 +217,6 @@
 ;; Browser panes
 ;;
 
-(defnc Next [{:keys [view views current]}]
-  [pc/Pane {:title "Next"
-            :controls [:div
-                       [:select {:value (str (:id view))
-                                 :on-change #(dispatch [:punk.ui.browser/select-next-view
-                                                        (keyword (subs (.. % -target -value) 1))])}
-                        (for [vid (map (comp str :id) views)]
-                          [:option {:key vid} vid])]]}
-   [(:view view)
-    {:data (-> current :value)
-     :id "punk__next"
-     :nav #(dispatch [:punk.ui.browser/nav-to-next])}]])
-
-(defnc Current [{:keys [history view views current]}]
-  [pc/Pane
-   {:title "Current"
-    :id "punk__current"
-    :controls [:div
-               [:select {:value (str (:id view))
-                         :on-change #(dispatch [:punk.ui.browser/select-current-view
-                                                (keyword (subs (.. % -target -value) 1))])}
-                (for [vid (map (comp str :id) views)]
-                  [:option {:key vid} vid])]
-               [:button {:type "button"
-                         :id "punk__current__back-button"
-                         :disabled (empty? history)
-                         :on-click #(dispatch [:punk.ui.browser/history-back])} "<"]
-               [pc/Breadcrumbs
-                {:items (map :nav-key history)
-                 :on-click #(dispatch [:punk.ui.browser/history-nth %])}]]}
-   [(:view view)
-    {:data (-> current :value)
-     :nav #(dispatch [:punk.ui.browser/preview
-                      (-> current :idx) %2 %3])}]])
-
 (defnc Browser [{:keys [state width]}]
   (let [next-views (-> (:views state)
                        (match-views (-> state :next :value)))
@@ -348,27 +240,21 @@
        :rowHeight 30
        :width width
        :draggableHandle ".punk__pane__titlebar"}
-      ;; Next
-      [:div {:key "next"}
-       [Next {:view next-view
-              :views next-views
-              :current (-> state :next)}]]
-      ;; Current
-      [:div {:key "current"}
-       [Current {:history (:history state)
-                 :view current-view
-                 :views current-views
-                 :current (-> state :current)}]]
       ;; Entries
+      [:div {:key "asdfjkl"}
+       [insp/Inspector {:on-close #()}]]
       [:div {:key "entries"}
-       [pc/Pane {:title "Entries" :id "punk__entries"}
+       [pc/Pane {:title [:div [:span "Entries"]
+                         [pc/TopControls ;; {:on-minimize #()}
+                          ]]
+                 :id "punk__entries"}
         (let [entries (reverse (map-indexed vector (:entries state)))]
           [pc/Table {:cols [[:id first [:div {:class "punk__entry-column__id"}]]
                             [:value (comp :value second) [:div {:class "punk__entry-column__value"}]]
                             ;; [:meta (comp :meta second) {:flex 5}]
                             ]
                      :on-entry-click (fn [_ entry]
-                                       (dispatch [:punk.ui.browser/view-entry (second entry)]))
+                                       (dispatch [:punk.ui.browser/inspect-entry (second entry)]))
                      :data entries}])]]]]))
 
 (def dragging? (atom false))

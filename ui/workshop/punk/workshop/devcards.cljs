@@ -43,22 +43,28 @@
 (dc/defcard Plain-Inspector
   (hx/f [:div {:style {:height "200px"}}
          [insp/Inspector
-          {:views views
+          {:name "0"
+           :views views
            :selected-view view
            :current current
-           :history history}]]))
+           :history history
+           :on-close #()
+           :on-minimize #()}]]))
 
 (dc/defcard Preview-Inspector
   (hx/f [:div {:style {:height "200px"}}
          [insp/Preview
-          {:views views
+          {:name "0"
+           :views views
            :selected-view {:id :punk.view/coll
                            :match (every-pred
                                    coll?
                                    (comp not map?))
                            :view #'views/CollView}
            :current current
-           :selected-key :asdf}]]))
+           :selected-key :asdf
+           :on-close #()
+           :on-minimize #()}]]))
 
 (dc/defcard pane
   (hx/f [:div {:style {:position "relative"
