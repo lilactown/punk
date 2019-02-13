@@ -45,7 +45,7 @@
          [insp/Inspector
           {:views views
            :selected-view view
-           :value (:value current)
+           :current current
            :history history}]]))
 
 (dc/defcard Preview-Inspector
@@ -57,7 +57,7 @@
                                    coll?
                                    (comp not map?))
                            :view #'views/CollView}
-           :value (:value current)
+           :current current
            :selected-key :asdf}]]))
 
 (dc/defcard pane

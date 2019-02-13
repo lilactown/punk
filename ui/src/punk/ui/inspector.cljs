@@ -4,7 +4,7 @@
             [punk.ui.components :as pc]
             [clojure.string :as s]))
 
-(defnc Preview [{:keys [value name selected-key
+(defnc Preview [{:keys [current name selected-key
                         views selected-view
                         on-minimize on-close
                         on-inspector on-view-select
@@ -43,12 +43,12 @@
               :on-click (when (not= % selected-key)
                           on-select)}
              (str %))
-           (keys value))]]
+           (keys (:value current)))]]
     [:div {:class "punk__inspector__preview__view"}
      [(:view selected-view)
-      {:data (-> value selected-key)}]]]])
+      {:data (-> current :value selected-key)}]]]])
 
-(defnc Inspector [{:keys [value history name
+(defnc Inspector [{:keys [current history name
                           views selected-view
                           on-minimize on-close
                           on-select on-history-select
@@ -62,8 +62,7 @@
                [:select {:value (str (:id selected-view))
                          ;; :on-change #(dispatch [:punk.ui.browser/select-current-view
                          ;;                        (keyword (subs (.. % -target -value) 1))])
-                         :on-change on-view-select
-                         }
+                         :on-change on-view-select}
                 (for [vid (map (comp str :id) views)]
                   [:option {:key vid} vid])]
                [:button {:type "button"
@@ -71,14 +70,13 @@
                                  "punk__inspector__back-button"]
                          :disabled (empty? history)
                          ;; :on-click #(dispatch [:punk.ui.browser/history-back])
-                         :on-click on-back
-                         } "<"]
+                         :on-click on-back} "<"]
                [pc/Breadcrumbs
                 {:items (map :nav-key history)
                  ;; :on-click #(dispatch [:punk.ui.browser/history-nth %])
                  :on-click on-history-select}]]}
    [(:view selected-view)
-    {:data (-> value)
+    {:data (-> current :value)
      ;; :nav  #(dispatch [:punk.ui.browser/nav-to
      ;;             (-> current :idx) %2 %3])
      :nav on-select}]])
