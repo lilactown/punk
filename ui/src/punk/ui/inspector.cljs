@@ -2,96 +2,67 @@
   (:require [hx.react :as hx :refer [defnc]]
             [hx.hooks :refer [<-state]]
             [punk.ui.components :as pc]
-            [punk.ui.views :as views]
             [clojure.string :as s]))
 
-(def views [{:id :punk.view/nil
-             :match nil?
-             :view nil}
-
-            {:id :punk.view/map
-             :match map?
-             :view #'views/MapView}
-
-            {:id :punk.view/set
-             :match set?
-             :view #'views/SetView}
-
-            {:id :punk.view/coll
-             :match (every-pred
-                     coll?
-                     (comp not map?))
-             :view #'views/CollView}
-
-            {:id :punk.view/edn
-             :match any?
-             :view #'views/EdnView}])
-
-(def view {:id :punk.view/map
-           :match map?
-           :view #'views/MapView})
-
-(def history [{:nav-key 0}
-              {:nav-key :cdk/component}
-              {:nav-key [123]}])
-
-(def current {:value {:asdf ['jkl]
-                      :foo {:bar #{:baz/yuiop}}}})
-
-(defnc Preview [_]
+(defnc Preview [{:keys [value name selected-key
+                        views selected-view
+                        on-minimize on-close
+                        on-inspector on-view-select
+                        on-select on-nav]}]
   [pc/Pane {:title [:div
                     [:span "Thingy" " :: "
                      [:a {:href ""
-                          :on-click #(.preventDefault %)} "Inspector"] " > " "Preview"]
-                    [:div {:class "punk__pane__top-controls"}
-                     [:div "—"]
-                     [:div "ｘ"]]]
+                          :on-click #(do (.preventDefault %)
+                                         (on-inspector))}
+                      "Inspector"]
+                     " > " "Preview"]
+                    [pc/TopControls {:on-close on-close :on-minimize on-minimize}]]
             :class "punk__inspector__preview"
             :controls [:div
                        [:div {:class "punk__pane__bottom-controls__spacer"}]
                        [:div {:class "punk__pane__bottom-controls__controls"}
-                        [:select {:value (str (:id view))
+                        [:select {:value (str (:id selected-view))
                                   ;; :on-change #(dispatch [:punk.ui.browser/select-current-view
                                   ;;                        (keyword (subs (.. % -target -value) 1))])
-                                  }
+                                  :on-change on-view-select}
                          (for [vid (map (comp str :id) views)]
                            [:option {:key vid} vid])]
                         [:div {:class "punk__pane__bottom-controls__right-align"}
                          [:button {:class ["punk__pane__bottom-button"
-                                           "punk__inspector__nav-button"]} "Nav"]]]]}
-   ;; [:div {:style {:padding "8px"
-   ;;                :display "flex"}}
-   ;;  [:div {:style {:border-bottom "1px solid #999"
-   ;;                 :flex 3}} "key"]
-   ;;  [:div {:style {:border-bottom "1px solid #999"
-   ;;                 :flex 9}} "value"]]
+                                           "punk__inspector__nav-button"]
+                                   :on-click on-nav} "Nav"]]]]}
    [:div {:class "punk__inspector__preview__container"}
     [:div {:class "punk__inspector__preview__key-list"}
      [:div
       (map #(vector
              :div
-             {:class (if (= % :asdf)
+             {:class (if (= % selected-key)
                        ["punk__inspector__preview__key-list__item"
                         "punk__inspector__preview__key-list__item__selected"]
-                       "punk__inspector__preview__key-list__item")}
+                       "punk__inspector__preview__key-list__item")
+              :on-click (when (not= % selected-key)
+                          on-select)}
              (str %))
-           '(:asdf :jkl))]]
+           (keys value))]]
     [:div {:class "punk__inspector__preview__view"}
-     [views/CollView
-      {:data (-> current :value :asdf)}]]]])
+     [(:view selected-view)
+      {:data (-> value selected-key)}]]]])
 
-(defnc Inspector [_]
+(defnc Inspector [{:keys [value history name
+                          views selected-view
+                          on-minimize on-close
+                          on-select on-history-select
+                          on-back on-view-select]}]
   [pc/Pane
    {:title [:div
             [:span "Thingy" " :: " " Inspector"]
-            [:div {:class "punk__pane__top-controls"}
-             [:div "—"]
-             [:div "ｘ"]]]
+            [pc/TopControls {:on-close on-close :on-minimize on-minimize}]]
     :class "punk__inspector"
     :controls [:div
-               [:select {:value (str (:id view))
+               [:select {:value (str (:id selected-view))
                          ;; :on-change #(dispatch [:punk.ui.browser/select-current-view
                          ;;                        (keyword (subs (.. % -target -value) 1))])
+                         :on-change on-view-select
                          }
                 (for [vid (map (comp str :id) views)]
                   [:option {:key vid} vid])]
@@ -100,13 +71,14 @@
                                  "punk__inspector__back-button"]
                          :disabled (empty? history)
                          ;; :on-click #(dispatch [:punk.ui.browser/history-back])
+                         :on-click on-back
                          } "<"]
                [pc/Breadcrumbs
                 {:items (map :nav-key history)
                  ;; :on-click #(dispatch [:punk.ui.browser/history-nth %])
-                 }]]}
-   [(:view view)
-    {:data (-> current :value)
+                 :on-click on-history-select}]]}
+   [(:view selected-view)
+    {:data (-> value)
      ;; :nav  #(dispatch [:punk.ui.browser/nav-to
      ;;             (-> current :idx) %2 %3])
-     }]])
+     :nav on-select}]])

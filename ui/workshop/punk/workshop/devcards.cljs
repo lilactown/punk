@@ -2,17 +2,63 @@
   (:require [devcards.core :as dc :include-macros true]
             [punk.ui.components :as punk-ui]
             [punk.ui.inspector :as insp]
+            [punk.ui.views :as views]
             [hx.react :as hx]))
 
 (devcards.core/start-devcard-ui!)
 
+(def views [{:id :punk.view/nil
+             :match nil?
+             :view nil}
+
+            {:id :punk.view/map
+             :match map?
+             :view #'views/MapView}
+
+            {:id :punk.view/set
+             :match set?
+             :view #'views/SetView}
+
+            {:id :punk.view/coll
+             :match (every-pred
+                     coll?
+                     (comp not map?))
+             :view #'views/CollView}
+
+            {:id :punk.view/edn
+             :match any?
+             :view #'views/EdnView}])
+
+(def view {:id :punk.view/map
+           :match map?
+           :view #'views/MapView})
+
+(def history [{:nav-key 0}
+              {:nav-key :cdk/component}
+              {:nav-key [123]}])
+
+(def current {:value {:asdf ['jkl]
+                      :foo {:bar #{:baz/yuiop}}}})
+
 (dc/defcard Plain-Inspector
   (hx/f [:div {:style {:height "200px"}}
-         [insp/Inspector]]))
+         [insp/Inspector
+          {:views views
+           :selected-view view
+           :value (:value current)
+           :history history}]]))
 
 (dc/defcard Preview-Inspector
   (hx/f [:div {:style {:height "200px"}}
-         [insp/Preview]]))
+         [insp/Preview
+          {:views views
+           :selected-view {:id :punk.view/coll
+                           :match (every-pred
+                                   coll?
+                                   (comp not map?))
+                           :view #'views/CollView}
+           :value (:value current)
+           :selected-key :asdf}]]))
 
 (dc/defcard pane
   (hx/f [:div {:style {:position "relative"
