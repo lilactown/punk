@@ -50,14 +50,12 @@
 }
 
 .punk__pane__top-controls > div {
-    cursor: "pointer";
+    cursor: pointer;
     padding: 0 4px;
     margin: 0 4px;
 }
 
 .punk__pane__top-controls > div:last-child {
-    cursor: "pointer";
-    padding: 0 4px;
     margin: 0 -4px 0 4px;
 }
 
