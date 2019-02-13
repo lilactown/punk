@@ -38,11 +38,37 @@
     font-weight: 500;
 }
 
+.punk__pane__bottom-button {
+    width: 60px;
+    margin-left: 10px;
+    margin-right: 5px;
+}
+
+.punk__pane__top-controls {
+    float: right;
+    display: flex;
+}
+
+.punk__pane__top-controls > div {
+    cursor: "pointer";
+    padding: 0 4px;
+    margin: 0 4px;
+}
+
+.punk__pane__top-controls > div:last-child {
+    cursor: "pointer";
+    padding: 0 4px;
+    margin: 0 -4px 0 4px;
+}
+
 .punk__pane__bottom-controls {
     padding: 5px 8px;
     background: #eee;
 }
 
+.punk__pane__bottom-controls__right-align {
+    float: right;
+}
 
 /* Table */
 
@@ -114,12 +140,6 @@
     background-color: #eaeaea;
 }
 
-.punk__inspector__back-button {
-    width: 60px;
-    margin-left: 10px;
-    margin-right: 5px;
-}
-
 /* Inspector Preview */
 
 .punk__inspector__preview .punk__pane__body-container {
@@ -132,8 +152,49 @@
     flex: 1;
 }
 
+.punk__inspector__preview__container {
+    display: flex;
+    min-height: 100%;
+}
+
+.punk__inspector__preview__key-list {
+    flex: 3;
+    border-right: 1px solid #eee;
+}
+
+.punk__inspector__preview__key-list__item {
+    padding: 3px 8px;
+    margin: 3px 0;
+}
+
+.punk__inspector__preview__key-list__item__selected {
+    background: #eee;
+}
+
+.punk__inspector__preview__view {
+    flex: 9;
+    padding: 8px;
+}
+
 .punk__inspector__preview .punk__pane__bottom-controls {
     padding: 0;
+}
+
+.punk__inspector__preview .punk__pane__bottom-controls > div {
+    display: flex;
+}
+
+.punk__inspector__preview .punk__pane__bottom-controls__spacer {
+    display: flex;
+    flex: 3;
+    padding: 5px 0;
+    background: white;
+    border-right: 1px solid #eee;
+}
+
+.punk__inspector__preview .punk__pane__bottom-controls__controls {
+    flex: 9;
+    padding: 5px 8px;
 }
 
 

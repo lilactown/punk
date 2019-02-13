@@ -43,55 +43,40 @@
                     [:span "Thingy" " :: "
                      [:a {:href ""
                           :on-click #(.preventDefault %)} "Inspector"] " > " "Preview"]
-                    [:div {:style {:float "right"
-                                   :display "flex"}}
-                     [:div {:style {:cursor "pointer"
-                                    :padding "0 4px"
-                                    :margin "0 4px"}} "—"]
-                     [:div {:style {:cursor "pointer"
-                                    :padding "0 4px"
-                                    :margin "0 -4px 0 4px"}} "ｘ"]]]
+                    [:div {:class "punk__pane__top-controls"}
+                     [:div "—"]
+                     [:div "ｘ"]]]
             :class "punk__inspector__preview"
-            :controls [:div {:style {:display "flex"}}
-                       [:div {:style {:flex 3
-                                      :padding "5px 0" ;;"5px 3px"
-                                      :background "white"
-                                      :border-right "1px solid #eee"}}]
-                       [:div {:style {:flex 9
-                                      :padding "5px 8px"}}
+            :controls [:div
+                       [:div {:class "punk__pane__bottom-controls__spacer"}]
+                       [:div {:class "punk__pane__bottom-controls__controls"}
                         [:select {:value (str (:id view))
                                   ;; :on-change #(dispatch [:punk.ui.browser/select-current-view
                                   ;;                        (keyword (subs (.. % -target -value) 1))])
                                   }
                          (for [vid (map (comp str :id) views)]
                            [:option {:key vid} vid])]
-                        [:div {:style {:float "right"}}
-                         [:button {:id "punk__current__back-button"} "Nav"]]]]}
+                        [:div {:class "punk__pane__bottom-controls__right-align"}
+                         [:button {:class ["punk__pane__bottom-button"
+                                           "punk__inspector__nav-button"]} "Nav"]]]]}
    ;; [:div {:style {:padding "8px"
    ;;                :display "flex"}}
    ;;  [:div {:style {:border-bottom "1px solid #999"
    ;;                 :flex 3}} "key"]
    ;;  [:div {:style {:border-bottom "1px solid #999"
    ;;                 :flex 9}} "value"]]
-   [:div {:style {:display "flex" :min-height "100%"
-                  ;; :padding-left "8px"
-                  ;; :padding-right "8px"
-                  }}
-    [:div {:style {:flex 3
-                   :border-right "1px solid #eee"
-                   ;; :padding "8px"
-                   }}
+   [:div {:class "punk__inspector__preview__container"}
+    [:div {:class "punk__inspector__preview__key-list"}
      [:div
       (map #(vector
              :div
-             {:style (merge {:padding "3px 8px"
-                             :margin "3px 0"}
-                            (when (= % :asdf)
-                              {:background "#eee"}))}
+             {:class (if (= % :asdf)
+                       ["punk__inspector__preview__key-list__item"
+                        "punk__inspector__preview__key-list__item__selected"]
+                       "punk__inspector__preview__key-list__item")}
              (str %))
            '(:asdf :jkl))]]
-    [:div {:style {:flex 9
-                   :padding "8px"}}
+    [:div {:class "punk__inspector__preview__view"}
      [views/CollView
       {:data (-> current :value :asdf)}]]]])
 
@@ -99,14 +84,9 @@
   [pc/Pane
    {:title [:div
             [:span "Thingy" " :: " " Inspector"]
-            [:div {:style {:float "right"
-                           :display "flex"}}
-             [:div {:style {:cursor "pointer"
-                            :padding "0 4px"
-                            :margin "0 4px"}} "—"]
-             [:div {:style {:cursor "pointer"
-                            :padding "0 4px"
-                            :margin "0 -4px 0 4px"}} "ｘ"]]]
+            [:div {:class "punk__pane__top-controls"}
+             [:div "—"]
+             [:div "ｘ"]]]
     :class "punk__inspector"
     :controls [:div
                [:select {:value (str (:id view))
@@ -116,7 +96,8 @@
                 (for [vid (map (comp str :id) views)]
                   [:option {:key vid} vid])]
                [:button {:type "button"
-                         :class "punk__inspector__back-button"
+                         :class ["punk__pane__bottom-button"
+                                 "punk__inspector__back-button"]
                          :disabled (empty? history)
                          ;; :on-click #(dispatch [:punk.ui.browser/history-back])
                          } "<"]
