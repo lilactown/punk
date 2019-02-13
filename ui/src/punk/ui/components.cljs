@@ -5,9 +5,12 @@
 (defnc Style [{:keys [children]}]
   [:style {:dangerouslySetInnerHTML #js {:__html (s/join "\n" children)}}])
 
-(defnc Pane [{:keys [title id controls children]}]
+(defnc Pane [{:keys [title id controls children class class-name]}]
   [:div {:id id
-         :class "punk__pane__container"}
+         :class (cond
+                  (coll? class-name) (conj class-name "punk__pane__container")
+                  (string? class-name) (conj [class-name] "punk__pane__container")
+                  :else "punk__pane__container")}
    [:div {:class "punk__pane__body-container"}
     [:div {:class "punk__pane__titlebar"}
      [:span title]]

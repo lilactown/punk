@@ -51,7 +51,7 @@
                      [:div {:style {:cursor "pointer"
                                     :padding "0 4px"
                                     :margin "0 -4px 0 4px"}} "ｘ"]]]
-            :id "punk__inspector__preview"
+            :class "punk__inspector__preview"
             :controls [:div {:style {:display "flex"}}
                        [:div {:style {:flex 3
                                       :padding "5px 0" ;;"5px 3px"
@@ -107,7 +107,7 @@
              [:div {:style {:cursor "pointer"
                             :padding "0 4px"
                             :margin "0 -4px 0 4px"}} "ｘ"]]]
-    :id "punk__current"
+    :class "punk__inspector"
     :controls [:div
                [:select {:value (str (:id view))
                          ;; :on-change #(dispatch [:punk.ui.browser/select-current-view
@@ -116,7 +116,7 @@
                 (for [vid (map (comp str :id) views)]
                   [:option {:key vid} vid])]
                [:button {:type "button"
-                         :id "punk__current__back-button"
+                         :class "punk__inspector__back-button"
                          :disabled (empty? history)
                          ;; :on-click #(dispatch [:punk.ui.browser/history-back])
                          } "<"]
