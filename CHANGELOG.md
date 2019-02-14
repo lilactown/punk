@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.0.7] - Feb 13, 2019
+
+### Fixes
+
+- Fix padding around entries ID
+- Fix #8: margin around body in Node.js adapter
+- Fix #9: Long key names in map view don't look right
+- Fix #11: Long unbroken strings display wrong in tables
+
 ## [0.0.6] - Feb 12, 2019
 
  - Previewing a value in the **Next** pane doesn't call `nav` on the value.
