@@ -2,7 +2,6 @@
   (:require
    [aleph.http :as ah]
    [clojure.edn :as ce]
-   [clojure.java.io :as cji]
    [compojure.core :as cc]
    [compojure.route :as cr]
    [frame.core :as fc]
