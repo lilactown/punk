@@ -94,6 +94,24 @@ Now, load your app in the browser; Punk's drawer should be on the right hand
 side. Clicking the drawer or pressing the hot key `Ctrl-Alt-P` will expand the
 UI.
 
+### JVM
+
+In a JVM Clojure project, include the `punk.adapter.jvm` library:
+
+[![Clojars Project](https://img.shields.io/clojars/v/lilactown/punk-adapter-jvm.svg)](https://clojars.org/lilactown/punk-adapter-jvm)
+
+Then, in your codebase, start the Punk server:
+
+```clojure
+(ns my-app.core
+  (:require [punk.adapter.jvm :as paj]))
+
+(paj/start)
+```
+
+The JVM adapter automatically starts a web server at [http://localhost:9876](http://localhost:9876).
+Navigate there to see the the Punk UI.
+
 
 ### Node.js
 
