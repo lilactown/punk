@@ -1,12 +1,13 @@
 (ns punk.core
-  (:require [goog.object :as gobj]
-            [clojure.string :as s]
-            [frame.core :as f]
+  (:require [frame.core :as f]
             [clojure.core.protocols :as p]
             [clojure.datafy :as d]
-            [cljs.repl :as repl]))
+            #?(:cljs [cljs.repl :as repl])))
 
-(def dbg> (partial js/console.log "punk>"))
+(def dbg>
+  (partial #?(:clj println
+              :cljs js/console.log)
+           "punk>"))
 
 ;;
 ;; Implement general protocols
@@ -16,24 +17,25 @@
 
 (def nav d/nav)
 
-(extend-protocol IPrintWithWriter
-  js/Symbol
-  (-pr-writer [sym writer _]
-    (-write writer (str "\"" (.toString sym) "\""))))
+#?(:cljs (extend-protocol IPrintWithWriter
+           js/Symbol
+           (-pr-writer [sym writer _]
+             (-write writer (str "\"" (.toString sym) "\"")))))
 
 (defn dataficate [x]
-  (cond
-    ;; (object? x)
-    ;; (do (specify! x
-    ;;       p/Datafiable
-    ;;       (datafy [o] (dissoc (js->clj o)
-    ;;                           ;; lol gross
-    ;;                           "clojure$core$protocols$Datafiable$"
-    ;;                           "clojure$core$protocols$Datafiable$datafy$arity$1")))
-    ;;     x)
-    (instance? js/Error x)
-    (repl/Error->map x)
-    :else x))
+  #?(:clj x ; XXX: might need some work :)
+     :cljs (cond
+             ;; (object? x)
+             ;; (do (specify! x
+             ;;       p/Datafiable
+             ;;       (datafy [o] (dissoc (js->clj o)
+             ;;                           ;; lol gross
+             ;;                           "clojure$core$protocols$Datafiable$"
+             ;;                           "clojure$core$protocols$Datafiable$datafy$arity$1")))
+             ;;     x)
+             (instance? js/Error x)
+             (repl/Error->map x)
+             :else x)))
 
 ;;
 ;; State
@@ -64,18 +66,26 @@
 (def debug-db
   (frame.interceptors/->interceptor
    :id :punk/debug-db
-   :before (dbg (fn [x] (js/console.log "db/before> " (-> x :coeffects :db))))
-   :after (dbg (fn [x] (js/console.log "db/after> " (-> x :effects :db))))))
+   :before (dbg (fn [x] (#?(:clj println
+                            :cljs js/console.log)
+                         "db/before> " (-> x :coeffects :db))))
+   :after (dbg (fn [x] (#?(:clj println
+                           :cljs js/console.log)
+                        "db/after> " (-> x :effects :db))))))
 
 (def debug-event
   (frame.interceptors/->interceptor
    :id :punk/debug-event
-   :before (dbg (fn [x] (js/console.log "event> " (-> x :coeffects :event))))))
+   :before (dbg (fn [x] (#?(:clj println
+                            :cljs js/console.log)
+                         "event> " (-> x :coeffects :event))))))
 
 (def debug-fx
   (frame.interceptors/->interceptor
    :id :punk/debug-event
-   :after (dbg (fn [x] (js/console.log "effects> " (-> x :effects))))))
+   :after (dbg (fn [x] (#?(:clj println
+                           :cljs js/console.log)
+                        "effects> " (-> x :effects))))))
 
 (f/reg-event-fx
  frame :tap
