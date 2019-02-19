@@ -26,7 +26,7 @@ simply use the `tap>` function to send it to the Punk UI.
 
 While your application is running, you will be able to view the Punk UI
 either embedded on the webpage (browser) or on a web server started on your
-localhost (Node.js).
+localhost (JVM and Node.js).
 
 ![how to browser](./punk-1.gif)
 
@@ -62,12 +62,13 @@ can live completely separate from your application code, which means that the
 whole package is much lighter weight in terms of dependencies.
 
 When in a web browser, it passes messages directly between your application and 
-the UI via `core.async`. When in a server context (e.g. Node.js), it 
+the UI via `core.async`. When in a server context (e.g. JVM, Node.js), it 
 communicates via websockets.
 
-If you're interested in implementing a Punk adapter in a specific context (e.g.
-JVM, vanilla JavaScript, etc.), let me know! It is relatively straight forward
-but there are still some details that I'm sure will need to be ironed out.
+If you're interested in implementing a Punk adapter in a specific context 
+(chrome extension, VS Code, vanilla JavaScript, etc.), let me know! It is 
+relatively straight forward but there are still some details that I'm sure will
+need to be ironed out.
 
 ## Installation
 
