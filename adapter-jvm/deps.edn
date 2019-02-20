@@ -1,4 +1,4 @@
 {:paths ["src" "example"]
- :deps {punk/core {:local/root "../core"}
+ :deps {punk/core {:local/root "../core" :deps/manifest :deps}
         compojure {:mvn/version "1.6.1"}
         aleph {:mvn/version "0.4.6"}}}

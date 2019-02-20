@@ -2,4 +2,4 @@
  :deps {org.clojure/clojurescript {:mvn/version "1.10.516"}
         ;; org.clojure/clojurescript {:git/url "https://github.com/clojure/clojurescript.git"
         ;;                            :sha "82c10925eb8d9c3cecf23447ddf4e1342f120b69"}
-        frame {:local/root "../frame"}}}
+        frame {:local/root "../frame" :deps/manifest :deps}}}
