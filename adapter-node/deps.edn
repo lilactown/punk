@@ -1,5 +1,5 @@
 {:paths ["src" "example"]
- :deps {punk/core {:local/root "../core"}}
+ :deps {punk/core {:local/root "../core" :deps/manifest :deps}}
  :aliases
  {:dev
   {:extra-deps {org.clojure/clojurescript {:mvn/version "1.10.516"}}}}}

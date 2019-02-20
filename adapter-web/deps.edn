@@ -1,2 +1,2 @@
 {:paths ["src"]
- :deps {punk/core {:local/root "../core"}}}
+ :deps {punk/core {:local/root "../core" :deps/manifest :deps}}}
