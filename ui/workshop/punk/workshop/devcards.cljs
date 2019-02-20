@@ -1,5 +1,6 @@
 (ns punk.workshop.devcards
   (:require [devcards.core :as dc :include-macros true]
+            [punk.workshop.devcards.inspector]
             [punk.ui.components :as punk-ui]
             [punk.ui.inspector :as insp]
             [punk.ui.views :as views]
