@@ -5,7 +5,7 @@ Punk is a developer tool for helping you visualize and navigate data in your app
 It implements the [Read-Eval-Browse-Loop](https://www.youtube.com/watch?v=c52QhiXsmyI)
 concept that Stuart Halloway presented at Clojure/conj 2018.
 
-The project status is currently what I would consider a "stable proof-of-concept":
+The project status is currently what I would consider a "usable proof-of-concept":
 fit for use, but by no means can I call it a maximal UX for such a 
 tool.
 
