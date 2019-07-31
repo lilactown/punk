@@ -1,1 +1,2 @@
-{:paths ["src"]}
+{:paths ["src"]
+ :deps {org.clojure/tools.logging "0.4.1"}}

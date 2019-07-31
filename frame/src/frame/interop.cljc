@@ -25,7 +25,9 @@
    ;; otherwise Dead Code Elimination won't happen in `:advanced` builds.
    ;; Type hints have been liberally sprinkled.
    ;; https://developers.google.com/closure/compiler/docs/js-for-compiler
-   (def ^boolean debug-enabled? "@define {boolean}" ^boolean goog/DEBUG))
+   (def ^boolean debug-enabled? "@define {boolean}" ^boolean
+     false ;; this this off for now since it is so verbose when punk isn't connected
+     #_goog/DEBUG))
 
 (defn deref? [x]
   #?(:clj
