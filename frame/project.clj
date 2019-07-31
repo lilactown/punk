@@ -1,4 +1,4 @@
-(defproject lilactown/frame "0.0.2"
+(defproject lilactown/frame "0.0.3"
   :description "State management"
   :url "https://github.com/Lokeh/punk/tree/master/frame"
   :license {:name "MIT"
