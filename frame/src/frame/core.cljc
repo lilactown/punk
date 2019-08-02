@@ -229,7 +229,8 @@
             (doseq [[effect-key effect-value] (:effects context)]
               (if-let [effect-fn (get-handler frame :fx effect-key false)]
                 (effect-fn effect-value)
-                (console :error "frame: no handler registered for effect:" effect-key ". Ignoring."))))))
+                (when debug-enabled?
+                  (console :error "frame: no handler registered for effect:" effect-key ". Ignoring.")))))))
 
 
 (defn register-default-fx [frame]
