@@ -1,7 +1,7 @@
-(defproject lilactown/punk-core "0.0.4"
+(defproject lilactown/punk-core "0.0.5"
   :description "Punk application server core"
   :url "https://github.com/Lokeh/punk"
   :license {:name "EPL"
             :url "https://opensource.org/licenses/EPL-2.0"}
   :source-paths ["src"]
-  :dependencies [[lilactown/frame "0.0.3"]])
+  :dependencies [[lilactown/frame "0.0.4"]])
