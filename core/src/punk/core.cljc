@@ -102,10 +102,10 @@
  frame :list
  []
  (fn [{:keys [db]} [_ x]]
-   {:emit [:entries (-> (:entries db)
-                        (mapv datafy)
-                        (mapv (fn [dx] {:value dx
-                                        :meta (meta dx)})))]}))
+   {:emit [:entries (->> (:entries db)
+                         (mapv datafy)
+                         (mapv (fn [dx] {:value dx
+                                         :meta (meta dx)})))]}))
 
 (f/reg-event-fx
  frame :nav
